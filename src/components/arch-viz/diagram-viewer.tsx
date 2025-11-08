@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Copy, Check } from 'lucide-react';
 import type { Componente } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
+import { plantumlEncoder } from 'plantuml-encoder';
+import Image from 'next/image';
 
 interface DiagramViewerProps {
   components: Componente[];
@@ -52,12 +54,28 @@ const generatePlantUmlCode = (components: Componente[], appName: string) => {
 export function DiagramViewer({ components, appName }: DiagramViewerProps) {
   const [isCopied, setIsCopied] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [diagramUrl, setDiagramUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   const plantUmlCode = useMemo(() => generatePlantUmlCode(components, appName), [components, appName]);
+
+  useEffect(() => {
+    if (isClient) {
+      setIsLoading(true);
+      try {
+        const encoded = plantumlEncoder.encode(plantUmlCode);
+        const url = `https://www.plantuml.com/plantuml/png/${encoded}`;
+        setDiagramUrl(url);
+      } catch (error) {
+        console.error("Error generating diagram URL:", error);
+        setDiagramUrl(''); // Clear url on error
+      }
+    }
+  }, [plantUmlCode, isClient]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(plantUmlCode).then(() => {
@@ -70,19 +88,28 @@ export function DiagramViewer({ components, appName }: DiagramViewerProps) {
     <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle>Visualización del Diagrama</CardTitle>
-        <CardDescription>Código PlantUML generado a partir de los componentes.</CardDescription>
+        <CardDescription>Diagrama generado a partir de los componentes.</CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 bg-muted/30 rounded-lg m-6 mt-0 p-4 relative overflow-hidden">
-        {isClient ? (
-          <pre className="text-sm overflow-auto h-full w-full">
-            <code>{plantUmlCode}</code>
-          </pre>
-        ) : (
-          <div className="space-y-2">
+      <CardContent className="flex-1 bg-muted/30 rounded-lg m-6 mt-0 p-4 relative overflow-auto flex items-center justify-center">
+        {!isClient || (isLoading && !diagramUrl) ? (
+          <div className="space-y-2 w-full">
             <Skeleton className="h-4 w-[250px]" />
             <Skeleton className="h-4 w-[200px]" />
             <Skeleton className="h-4 w-[220px]" />
+            <Skeleton className="h-32 w-full" />
           </div>
+        ) : diagramUrl ? (
+            <Image 
+              src={diagramUrl} 
+              alt={`Diagrama de arquitectura para ${appName}`}
+              fill
+              style={{ objectFit: 'contain' }}
+              onLoad={() => setIsLoading(false)}
+              onError={() => setIsLoading(false)} // Handle image load error
+              unoptimized // Required for external dynamic images
+            />
+        ) : (
+          <p>No se pudo generar el diagrama.</p>
         )}
       </CardContent>
       <CardFooter>
