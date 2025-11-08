@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Copy, Check } from 'lucide-react';
 import type { Componente } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
-import { plantumlEncoder } from 'plantuml-encoder';
+import plantumlEncoder from 'plantuml-encoder';
 import Image from 'next/image';
 
 interface DiagramViewerProps {
