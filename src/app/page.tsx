@@ -168,6 +168,13 @@ export default function Home() {
       if (options.length > 2) return options;
       return uniqueValues.length === 1 ? uniqueValues : options;
     }
+    
+    const createCurrencyOptions = (uniqueValues: string[]) => {
+      const options = ['all', ...uniqueValues];
+      if (uniqueValues.length === 0) return ['all'];
+      if (uniqueValues.length === 1) return uniqueValues;
+      return options;
+    }
 
     return {
       paises: ['all', ...Array.from(new Set(applications.map(a => a.pais)))],
@@ -175,7 +182,7 @@ export default function Home() {
       dominios1: createOptions(uniqueDominios1),
       dominios2: createOptions(uniqueDominios2),
       dominios3: createOptions(uniqueDominios3),
-      currencyIssuesOptions: createOptions(uniqueCurrencyIssues),
+      currencyIssuesOptions: createCurrencyOptions(uniqueCurrencyIssues),
       appIds: createOptions(uniqueAppIds),
       filteredApplications: finalFilteredApps,
       selectedApplication: selectedApp,
