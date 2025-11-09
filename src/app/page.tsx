@@ -157,7 +157,7 @@ export default function Home() {
         filteredApps = filteredApps.filter(app => app.disposition === filters.disposition);
     }
 
-    const uniqueCurrencyIssues = Array.from(new Set(filteredApps.map(a => a.currency_issues.toString())));
+    const uniqueCurrencyIssues = Array.from(new Set(filteredApps.map(a => a.currency_issues?.toString()).filter(Boolean)));
     const availableCurrencyIssues = uniqueCurrencyIssues.length > 1 ? ['all', ...uniqueCurrencyIssues] : uniqueCurrencyIssues;
 
     if (filters.currency_issues !== 'all') {
@@ -443,3 +443,5 @@ export default function Home() {
     </>
   );
 }
+
+    
