@@ -181,15 +181,21 @@ export default function Home() {
         ? applications.find(app => app.id === filters.aplicacionId) || null
         : finalFilteredApps.length === 1 ? finalFilteredApps[0] : null;
 
+    const createOptions = (uniqueValues: string[]) => {
+      const options = ['all', ...uniqueValues];
+      if (options.length > 2) return options;
+      return uniqueValues.length === 1 ? uniqueValues : options;
+    }
+
     return {
       paises: ['all', ...Array.from(new Set(applications.map(a => a.pais)))],
-      segmentos: availableSegmentos.length > 2 ? availableSegmentos : [...uniqueSegmentos],
-      dominios1: availableDominios1.length > 2 ? availableDominios1 : [...uniqueDominios1],
-      dominios2: availableDominios2.length > 2 ? availableDominios2 : [...uniqueDominios2],
-      dominios3: availableDominios3.length > 2 ? availableDominios3 : [...uniqueDominios3],
-      dispositions: availableDispositions.length > 2 ? availableDispositions : [...uniqueDispositions],
-      currencyIssuesOptions: availableCurrencyIssues.length > 2 ? availableCurrencyIssues : [...uniqueCurrencyIssues],
-      appIds: availableAppIds.length > 2 ? availableAppIds : [...uniqueAppIds],
+      segmentos: createOptions(uniqueSegmentos),
+      dominios1: createOptions(uniqueDominios1),
+      dominios2: createOptions(uniqueDominios2),
+      dominios3: createOptions(uniqueDominios3),
+      dispositions: createOptions(uniqueDispositions),
+      currencyIssuesOptions: createOptions(uniqueCurrencyIssues),
+      appIds: createOptions(uniqueAppIds),
       filteredApplications: finalFilteredApps,
       selectedApplication: selectedApp,
       filteredComponents: finalFilteredComponents,
