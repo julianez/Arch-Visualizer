@@ -68,12 +68,12 @@
     "noComponentsForFilters": "No hay componentes para mostrar con los filtros actuales.",
     "copied": "¡Copiado!",
     "copyCode": "Copiar Código",
-    "concurrencyIssues": "Concurrencia",
+    "concurrencyIssues": "Currency Issues",
     "disposition": "Disposición",
     "yes": "Sí",
     "no": "No",
     "dispositionPlaceholder": "Disposición...",
     "allDispositions": "Todas",
-    "currencyPlaceholder": "Problemas Moneda...",
+    "currencyPlaceholder": "Currency Issues...",
     "allCurrencies": "Todos"
 }
