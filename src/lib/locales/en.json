@@ -68,7 +68,7 @@
     "noComponentsForFilters": "No components to display with current filters.",
     "copied": "Copied!",
     "copyCode": "Copy Code",
-    "concurrencyIssues": "Currency Issues",
+    "currency_issues": "Currency Issues",
     "disposition": "Disposition",
     "yes": "Yes",
     "no": "No",

@@ -391,7 +391,7 @@ export default function Home() {
                         <div><strong>{t('domainN1')}:</strong> {selectedApplication.dominio.nivel1}</div>
                         <div><strong>{t('domainN2')}:</strong> {selectedApplication.dominio.nivel2}</div>
                         <div><strong>{t('domainN3')}:</strong> {selectedApplication.dominio.nivel3}</div>
-                        <div><strong>{t('concurrencyIssues')}:</strong> {selectedApplication.currency_issues ? t('yes') : t('no')}</div>
+                        <div><strong>{t('currency_issues')}:</strong> {selectedApplication.currency_issues ? t('yes') : t('no')}</div>
                         <div><strong>{t('disposition')}:</strong> {selectedApplication.disposition}</div>
                      </div>
                   )}
@@ -443,5 +443,3 @@ export default function Home() {
     </>
   );
 }
-
-    
