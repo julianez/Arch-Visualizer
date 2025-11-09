@@ -127,46 +127,46 @@ export default function Home() {
       filteredApps = filteredApps.filter(app => app.pais === filters.pais);
     }
     const uniqueSegmentos = Array.from(new Set(filteredApps.map(a => a.segmento)));
-    const availableSegmentos = uniqueSegmentos.length > 1 ? ['all', ...uniqueSegmentos] : uniqueSegmentos;
+    const availableSegmentos = ['all', ...uniqueSegmentos];
 
     if (filters.segmento !== 'all') {
       filteredApps = filteredApps.filter(app => app.segmento === filters.segmento);
     }
     const uniqueDominios1 = Array.from(new Set(filteredApps.map(a => a.dominio.nivel1)));
-    const availableDominios1 = uniqueDominios1.length > 1 ? ['all', ...uniqueDominios1] : uniqueDominios1;
+    const availableDominios1 = ['all', ...uniqueDominios1];
 
     if (filters.dominio1 !== 'all') {
       filteredApps = filteredApps.filter(app => app.dominio.nivel1 === filters.dominio1);
     }
     const uniqueDominios2 = Array.from(new Set(filteredApps.map(a => a.dominio.nivel2)));
-    const availableDominios2 = uniqueDominios2.length > 1 ? ['all', ...uniqueDominios2] : uniqueDominios2;
+    const availableDominios2 = ['all', ...uniqueDominios2];
 
     if (filters.dominio2 !== 'all') {
       filteredApps = filteredApps.filter(app => app.dominio.nivel2 === filters.dominio2);
     }
     const uniqueDominios3 = Array.from(new Set(filteredApps.map(a => a.dominio.nivel3)));
-    const availableDominios3 = uniqueDominios3.length > 1 ? ['all', ...uniqueDominios3] : uniqueDominios3;
+    const availableDominios3 = ['all', ...uniqueDominios3];
 
     if (filters.dominio3 !== 'all') {
       filteredApps = filteredApps.filter(app => app.dominio.nivel3 === filters.dominio3);
     }
     const uniqueDispositions = Array.from(new Set(filteredApps.map(a => a.disposition)));
-    const availableDispositions = uniqueDispositions.length > 1 ? ['all', ...uniqueDispositions] : uniqueDispositions;
+    const availableDispositions = ['all', ...uniqueDispositions];
     
     if (filters.disposition !== 'all') {
         filteredApps = filteredApps.filter(app => app.disposition === filters.disposition);
     }
 
-    const uniqueCurrencyIssues = Array.from(new Set(filteredApps.map(a => a.currency_issues?.toString()).filter(Boolean)));
-    const availableCurrencyIssues = uniqueCurrencyIssues.length > 1 ? ['all', ...uniqueCurrencyIssues] : uniqueCurrencyIssues;
+    const uniqueCurrencyIssues = Array.from(new Set(filteredApps.map(a => (a.currency_issues ?? false).toString())));
+    const availableCurrencyIssues = ['all', ...uniqueCurrencyIssues];
 
     if (filters.currency_issues !== 'all') {
-        filteredApps = filteredApps.filter(app => app.currency_issues.toString() === filters.currency_issues);
+        filteredApps = filteredApps.filter(app => (app.currency_issues ?? false).toString() === filters.currency_issues);
     }
 
     const filteredAppIds = new Set(filteredApps.map(app => app.id));
     const uniqueAppIds = Array.from(filteredAppIds);
-    const availableAppIds = uniqueAppIds.length > 1 ? ['all', ...uniqueAppIds] : uniqueAppIds;
+    const availableAppIds = ['all', ...uniqueAppIds];
 
 
     let finalFilteredComponents = filters.aplicacionId === 'all'
@@ -182,13 +182,13 @@ export default function Home() {
 
     return {
       paises: ['all', ...Array.from(new Set(applications.map(a => a.pais)))],
-      segmentos: availableSegmentos,
-      dominios1: availableDominios1,
-      dominios2: availableDominios2,
-      dominios3: availableDominios3,
-      dispositions: availableDispositions,
-      currencyIssuesOptions: availableCurrencyIssues,
-      appIds: availableAppIds,
+      segmentos: availableSegmentos.length > 2 ? availableSegmentos : uniqueSegmentos,
+      dominios1: availableDominios1.length > 2 ? availableDominios1 : uniqueDominios1,
+      dominios2: availableDominios2.length > 2 ? availableDominios2 : uniqueDominios2,
+      dominios3: availableDominios3.length > 2 ? availableDominios3 : uniqueDominios3,
+      dispositions: availableDispositions.length > 2 ? availableDispositions : uniqueDispositions,
+      currencyIssuesOptions: availableCurrencyIssues.length > 2 ? availableCurrencyIssues : uniqueCurrencyIssues,
+      appIds: availableAppIds.length > 2 ? availableAppIds : uniqueAppIds,
       filteredApplications: finalFilteredApps,
       selectedApplication: selectedApp,
       filteredComponents: finalFilteredComponents,
@@ -231,7 +231,7 @@ export default function Home() {
         }
       }
 
-      const filterHierarchy: (keyof Filters)[] = ['pais', 'segmento', 'dominio1', 'dominio2', 'dominio3', 'disposition', 'currency_issues', 'aplicacionId'];
+      const filterHierarchy: (keyof Filters)[] = ['pais', 'segmento', 'dominio1', 'dominio2', 'dominio3', 'disposition', 'currency_issues'];
       const currentIndex = filterHierarchy.indexOf(filterName);
 
       if(currentIndex !== -1) {
