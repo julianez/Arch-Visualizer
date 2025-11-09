@@ -71,5 +71,9 @@
     "concurrencyIssues": "Concurrency",
     "disposition": "Disposition",
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "dispositionPlaceholder": "Disposition...",
+    "allDispositions": "All Dispositions",
+    "currencyPlaceholder": "Currency Issues...",
+    "allCurrencies": "All"
 }

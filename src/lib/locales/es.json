@@ -71,5 +71,9 @@
     "concurrencyIssues": "Concurrencia",
     "disposition": "Disposición",
     "yes": "Sí",
-    "no": "No"
+    "no": "No",
+    "dispositionPlaceholder": "Disposición...",
+    "allDispositions": "Todas",
+    "currencyPlaceholder": "Problemas Moneda...",
+    "allCurrencies": "Todos"
 }

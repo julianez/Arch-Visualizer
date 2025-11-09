@@ -34,6 +34,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { dispositionTypes } from '@/lib/types';
 
 
 type Filters = {
@@ -42,6 +43,8 @@ type Filters = {
   dominio1: string | 'all';
   dominio2: string | 'all';
   dominio3: string | 'all';
+  disposition: string | 'all';
+  currency_issues: string | 'all';
   aplicacionId: string | 'all';
 };
 
@@ -57,6 +60,8 @@ export default function Home() {
     dominio1: 'all',
     dominio2: 'all',
     dominio3: 'all',
+    disposition: 'all',
+    currency_issues: 'all',
     aplicacionId: 'all',
   });
   
@@ -86,7 +91,7 @@ export default function Home() {
         setLocale(storedLocale as 'en' | 'es');
       }
 
-    } catch (error) {
+    } catch (error) => {
       console.error("Failed to read from localStorage", error);
     }
   }, []);
@@ -109,6 +114,8 @@ export default function Home() {
     dominios1,
     dominios2,
     dominios3,
+    dispositions,
+    currencyIssuesOptions,
     appIds,
     filteredApplications,
     selectedApplication,
@@ -143,6 +150,19 @@ export default function Home() {
     if (filters.dominio3 !== 'all') {
       filteredApps = filteredApps.filter(app => app.dominio.nivel3 === filters.dominio3);
     }
+    const uniqueDispositions = Array.from(new Set(filteredApps.map(a => a.disposition)));
+    const availableDispositions = uniqueDispositions.length > 1 ? ['all', ...uniqueDispositions] : uniqueDispositions;
+    
+    if (filters.disposition !== 'all') {
+        filteredApps = filteredApps.filter(app => app.disposition === filters.disposition);
+    }
+
+    const uniqueCurrencyIssues = Array.from(new Set(filteredApps.map(a => a.currency_issues.toString())));
+    const availableCurrencyIssues = uniqueCurrencyIssues.length > 1 ? ['all', ...uniqueCurrencyIssues] : uniqueCurrencyIssues;
+
+    if (filters.currency_issues !== 'all') {
+        filteredApps = filteredApps.filter(app => app.currency_issues.toString() === filters.currency_issues);
+    }
 
     const filteredAppIds = new Set(filteredApps.map(app => app.id));
     const uniqueAppIds = Array.from(filteredAppIds);
@@ -166,6 +186,8 @@ export default function Home() {
       dominios1: availableDominios1,
       dominios2: availableDominios2,
       dominios3: availableDominios3,
+      dispositions: availableDispositions,
+      currencyIssuesOptions: availableCurrencyIssues,
       appIds: availableAppIds,
       filteredApplications: finalFilteredApps,
       selectedApplication: selectedApp,
@@ -186,41 +208,36 @@ export default function Home() {
     if (dominios3.length === 1 && filters.dominio3 !== dominios3[0]) {
       handleFilterChange('dominio3', dominios3[0]);
     }
-     if (appIds.length === 1 && filters.aplicacionId !== appIds[0]) {
+    if (dispositions.length === 1 && filters.disposition !== dispositions[0]) {
+      handleFilterChange('disposition', dispositions[0]);
+    }
+    if (currencyIssuesOptions.length === 1 && filters.currency_issues !== currencyIssuesOptions[0]) {
+      handleFilterChange('currency_issues', currencyIssuesOptions[0]);
+    }
+    if (appIds.length === 1 && filters.aplicacionId !== appIds[0]) {
       handleFilterChange('aplicacionId', appIds[0]);
     }
-  }, [segmentos, dominios1, dominios2, dominios3, appIds, filters]);
+  }, [segmentos, dominios1, dominios2, dominios3, dispositions, currencyIssuesOptions, appIds, filters]);
 
 
   const handleFilterChange = (filterName: keyof Filters, value: string) => {
     setFilters(prevFilters => {
       const newFilters: Filters = { ...prevFilters, [filterName]: value };
       
-      if (filterName === 'pais') {
-        newFilters.segmento = 'all';
-        newFilters.dominio1 = 'all';
-        newFilters.dominio2 = 'all';
-        newFilters.dominio3 = 'all';
-        newFilters.aplicacionId = 'all';
+      const resetCascadingFilters = (startIndex: number) => {
+        const filterNames: (keyof Filters)[] = ['pais', 'segmento', 'dominio1', 'dominio2', 'dominio3', 'disposition', 'currency_issues', 'aplicacionId'];
+        for (let i = startIndex; i < filterNames.length; i++) {
+          newFilters[filterNames[i]] = 'all';
+        }
       }
-      if (filterName === 'segmento') {
-        newFilters.dominio1 = 'all';
-        newFilters.dominio2 = 'all';
-        newFilters.dominio3 = 'all';
-        newFilters.aplicacionId = 'all';
+
+      const filterHierarchy: (keyof Filters)[] = ['pais', 'segmento', 'dominio1', 'dominio2', 'dominio3', 'disposition', 'currency_issues', 'aplicacionId'];
+      const currentIndex = filterHierarchy.indexOf(filterName);
+
+      if(currentIndex !== -1) {
+        resetCascadingFilters(currentIndex + 1);
       }
-      if (filterName === 'dominio1') {
-        newFilters.dominio2 = 'all';
-        newFilters.dominio3 = 'all';
-        newFilters.aplicacionId = 'all';
-      }
-      if (filterName === 'dominio2') {
-        newFilters.dominio3 = 'all';
-        newFilters.aplicacionId = 'all';
-      }
-      if (filterName === 'dominio3') {
-        newFilters.aplicacionId = 'all';
-      }
+      
       return newFilters;
     });
   };
@@ -232,6 +249,8 @@ export default function Home() {
       dominio1: 'all',
       dominio2: 'all',
       dominio3: 'all',
+      disposition: 'all',
+      currency_issues: 'all',
       aplicacionId: 'all',
     });
   }
@@ -313,7 +332,7 @@ export default function Home() {
         </header>
         
         <div className="p-4 border-b">
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-4">
                  <Select onValueChange={(v) => handleFilterChange('pais', v)} value={filters.pais}>
                     <SelectTrigger><SelectValue placeholder={t('countryPlaceholder')} /></SelectTrigger>
                     <SelectContent>{paises.map(p => <SelectItem key={p} value={p}>{p === 'all' ? t('allCountries') : p}</SelectItem>)}</SelectContent>
@@ -333,6 +352,14 @@ export default function Home() {
                 <Select onValueChange={(v) => handleFilterChange('dominio3', v)} value={filters.dominio3}>
                     <SelectTrigger><SelectValue placeholder={t('domain3Placeholder')} /></SelectTrigger>
                     <SelectContent>{dominios3.map(d => <SelectItem key={d} value={d}>{d === 'all' ? t('allDomainsN3') : d}</SelectItem>)}</SelectContent>
+                </Select>
+                 <Select onValueChange={(v) => handleFilterChange('disposition', v)} value={filters.disposition}>
+                    <SelectTrigger><SelectValue placeholder={t('dispositionPlaceholder')} /></SelectTrigger>
+                    <SelectContent>{dispositions.map(d => <SelectItem key={d} value={d}>{d === 'all' ? t('allDispositions') : d}</SelectItem>)}</SelectContent>
+                </Select>
+                 <Select onValueChange={(v) => handleFilterChange('currency_issues', v)} value={filters.currency_issues}>
+                    <SelectTrigger><SelectValue placeholder={t('currencyPlaceholder')} /></SelectTrigger>
+                    <SelectContent>{currencyIssuesOptions.map(c => <SelectItem key={c} value={c}>{c === 'all' ? t('allCurrencies') : (c === 'true' ? t('yes') : t('no'))}</SelectItem>)}</SelectContent>
                 </Select>
                 <Select onValueChange={(v) => handleFilterChange('aplicacionId', v)} value={filters.aplicacionId}>
                     <SelectTrigger><SelectValue placeholder={t('applicationPlaceholder')} /></SelectTrigger>
