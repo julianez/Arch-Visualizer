@@ -29,7 +29,6 @@ export const initialApplicationData: Aplicacion[] = [
             nivel3: 'Inventario'
         },
         currency_issues: false,
-        disposition: 'Mantener'
     },
     {
         id: 'APL-2',
@@ -43,7 +42,6 @@ export const initialApplicationData: Aplicacion[] = [
             nivel3: 'Visualización'
         },
         currency_issues: true,
-        disposition: 'Actualizar'
     },
     {
         id: 'APL-3',
@@ -57,6 +55,5 @@ export const initialApplicationData: Aplicacion[] = [
             nivel3: 'Seguimiento'
         },
         currency_issues: false,
-        disposition: 'Investigar'
     }
 ];

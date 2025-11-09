@@ -69,11 +69,8 @@
     "copied": "Copied!",
     "copyCode": "Copy Code",
     "currency_issues": "Currency Issues",
-    "disposition": "Disposition",
     "yes": "Yes",
     "no": "No",
-    "dispositionPlaceholder": "Disposition...",
-    "allDispositions": "All Dispositions",
     "currencyPlaceholder": "Currency Issues...",
     "allCurrencies": "All"
 }

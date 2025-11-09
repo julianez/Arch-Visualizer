@@ -12,7 +12,6 @@ export interface Aplicacion {
   segmento: string;
   dominio: Dominio;
   currency_issues: boolean;
-  disposition: 'Mantener' | 'Actualizar' | 'Eliminar' | 'Investigar';
 }
 
 
@@ -26,4 +25,3 @@ export interface Componente {
 }
 
 export const componentTypes = ['Componente', 'Servicio', 'Módulo', 'Clase'];
-export const dispositionTypes = ['Mantener', 'Actualizar', 'Eliminar', 'Investigar'];
