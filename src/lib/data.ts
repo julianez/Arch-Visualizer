@@ -28,7 +28,7 @@ export const initialApplicationData: Aplicacion[] = [
             nivel2: 'Backend',
             nivel3: 'Inventario'
         },
-        currency_issues: false,
+        currency_issues: 'No',
     },
     {
         id: 'APL-2',
@@ -41,7 +41,7 @@ export const initialApplicationData: Aplicacion[] = [
             nivel2: 'Análisis',
             nivel3: 'Visualización'
         },
-        currency_issues: true,
+        currency_issues: 'Sí',
     },
     {
         id: 'APL-3',
@@ -54,6 +54,6 @@ export const initialApplicationData: Aplicacion[] = [
             nivel2: 'Comercial',
             nivel3: 'Seguimiento'
         },
-        currency_issues: false,
+        currency_issues: 'No',
     }
 ];

@@ -142,10 +142,10 @@ export default function Home() {
       filteredApps = filteredApps.filter(app => app.dominio.nivel3 === filters.dominio3);
     }
     
-    const uniqueCurrencyIssues = Array.from(new Set(filteredApps.map(a => (a.currency_issues ?? false).toString())));
+    const uniqueCurrencyIssues = Array.from(new Set(filteredApps.map(a => a.currency_issues)));
 
     if (filters.currency_issues !== 'all') {
-        filteredApps = filteredApps.filter(app => (app.currency_issues ?? false).toString() === filters.currency_issues);
+        filteredApps = filteredApps.filter(app => app.currency_issues === filters.currency_issues);
     }
 
     const filteredAppIds = new Set(filteredApps.map(app => app.id));
@@ -182,7 +182,7 @@ export default function Home() {
       dominios1: createOptions(uniqueDominios1),
       dominios2: createOptions(uniqueDominios2),
       dominios3: createOptions(uniqueDominios3),
-      currencyIssuesOptions: createCurrencyOptions(uniqueCurrencyIssues),
+      currencyIssuesOptions: createCurrencyOptions(uniqueCurrencyIssues as string[]),
       appIds: createOptions(uniqueAppIds),
       filteredApplications: finalFilteredApps,
       selectedApplication: selectedApp,
@@ -346,7 +346,7 @@ export default function Home() {
                 </Select>
                  <Select onValueChange={(v) => handleFilterChange('currency_issues', v)} value={filters.currency_issues}>
                     <SelectTrigger><SelectValue placeholder={t('currencyPlaceholder')} /></SelectTrigger>
-                    <SelectContent>{currencyIssuesOptions.map(c => <SelectItem key={c} value={c}>{c === 'all' ? t('allCurrencies') : (c === 'true' ? t('yes') : t('no'))}</SelectItem>)}</SelectContent>
+                    <SelectContent>{currencyIssuesOptions.map(c => <SelectItem key={c} value={c}>{c === 'all' ? t('allCurrencies') : c}</SelectItem>)}</SelectContent>
                 </Select>
                 <Select onValueChange={(v) => handleFilterChange('aplicacionId', v)} value={filters.aplicacionId}>
                     <SelectTrigger><SelectValue placeholder={t('applicationPlaceholder')} /></SelectTrigger>
@@ -378,7 +378,7 @@ export default function Home() {
                         <div><strong>{t('domainN1')}:</strong> {selectedApplication.dominio.nivel1}</div>
                         <div><strong>{t('domainN2')}:</strong> {selectedApplication.dominio.nivel2}</div>
                         <div><strong>{t('domainN3')}:</strong> {selectedApplication.dominio.nivel3}</div>
-                        <div><strong>{t('currency_issues')}:</strong> {selectedApplication.currency_issues ? t('yes') : t('no')}</div>
+                        <div><strong>{t('currency_issues')}:</strong> {selectedApplication.currency_issues}</div>
                      </div>
                   )}
                   {filteredApplications.length > 1 && <p className="mt-2 text-sm text-muted-foreground">{t('multipleApplicationsMatch', { count: filteredApplications.length })}</p>}
