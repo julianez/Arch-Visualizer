@@ -1,6 +1,6 @@
 'use client';
 
-import * as React from "react";
+import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import type { Componente } from "@/lib/types";
 import { componentTypes } from "@/lib/types";
+import { useI18n } from "@/context/i18n-context";
 
 const formSchema = z.object({
   id: z.string().min(1, "ID es requerido."),
@@ -50,6 +51,7 @@ interface ComponentFormProps {
 }
 
 export function ComponentForm({ isOpen, onClose, onSubmit, component, allComponents }: ComponentFormProps) {
+  const { t } = useI18n();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: component ? { ...component, padreId: component.padreId || '' } : {
@@ -89,9 +91,9 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px] bg-card">
         <DialogHeader>
-          <DialogTitle>{component ? 'Editar Componente' : 'Añadir Componente'}</DialogTitle>
+          <DialogTitle>{component ? t('editComponent') : t('addComponent')}</DialogTitle>
           <DialogDescription>
-            {component ? 'Edita los detalles del componente.' : 'Añade un nuevo componente a la arquitectura.'}
+            {component ? t('editComponentDescription') : t('addComponentDescription')}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -103,7 +105,7 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
                 <FormItem>
                   <FormLabel>ID</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: A1" {...field} disabled={!!component} />
+                    <Input placeholder={t('idPlaceholder')} {...field} disabled={!!component} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -114,9 +116,9 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
               name="nombre"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre</FormLabel>
+                  <FormLabel>{t('name')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: Microservicio Core" {...field} />
+                    <Input placeholder={t('namePlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -127,9 +129,9 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
               name="aplicacionId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ID de Aplicación</FormLabel>
+                  <FormLabel>{t('applicationId')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ej: APL-1" {...field} />
+                    <Input placeholder={t('applicationIdPlaceholder')} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -140,15 +142,15 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
               name="padreId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Padre</FormLabel>
+                  <FormLabel>{t('parent')}</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value ?? ''}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar padre..." />
+                        <SelectValue placeholder={t('parentPlaceholder')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Ninguno</SelectItem>
+                      <SelectItem value="">{t('none')}</SelectItem>
                       {parentOptions.map(p => (
                         <SelectItem key={p.id} value={p.id}>{p.nombre} ({p.id})</SelectItem>
                       ))}
@@ -163,11 +165,11 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
               name="tipo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tipo</FormLabel>
+                  <FormLabel>{t('type')}</FormLabel>
                    <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar tipo..." />
+                        <SelectValue placeholder={t('typePlaceholder')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
@@ -185,7 +187,7 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
               name="nivel"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nivel</FormLabel>
+                  <FormLabel>{t('level')}</FormLabel>
                   <FormControl>
                     <Input type="number" min="1" {...field} />
                   </FormControl>
@@ -194,8 +196,8 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
-              <Button type="submit">Guardar</Button>
+              <Button type="button" variant="ghost" onClick={onClose}>{t('cancel')}</Button>
+              <Button type="submit">{t('save')}</Button>
             </DialogFooter>
           </form>
         </Form>

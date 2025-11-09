@@ -1,6 +1,6 @@
-import type { Componente } from './types';
+import type { Componente, Aplicacion } from './types';
 
-export const initialData: Componente[] = [
+export const initialComponentData: Componente[] = [
   // Aplicación 1: Core System
   { id: 'A1', nombre: 'Microservicio Core', aplicacionId: 'APL-1', padreId: null, tipo: 'Componente', nivel: 1 },
   { id: 'A2', nombre: 'API de Productos', aplicacionId: 'APL-1', padreId: 'A1', tipo: 'Servicio', nivel: 2 },
@@ -9,5 +9,54 @@ export const initialData: Componente[] = [
 
   // Aplicación 2: Reporting
   { id: 'B1', nombre: 'Servidor de Reportes', aplicacionId: 'APL-2', padreId: null, tipo: 'Componente', nivel: 1 },
-  { id: 'B2', nombre: 'Exportador PDF', aplicacionId: 'APL-2', padreId: 'B1', tipo: 'Servicio', nivel: 2 }
+  { id: 'B2', nombre: 'Exportador PDF', aplicacionId: 'APL-2', padreId: 'B1', tipo: 'Servicio', nivel: 2 },
+
+  // Aplicación 3: CRM
+  { id: 'C1', nombre: 'Interfaz de Cliente', aplicacionId: 'APL-3', padreId: null, tipo: 'Componente', nivel: 1 },
+  { id: 'C2', nombre: 'Gestor de Contactos', aplicacionId: 'APL-3', padreId: 'C1', tipo: 'Servicio', nivel: 2 }
+];
+
+export const initialApplicationData: Aplicacion[] = [
+    {
+        id: 'APL-1',
+        nombre: 'Core System',
+        descripcion: 'Sistema central para la gestión de productos e inventario.',
+        pais: 'Global',
+        segmento: 'Retail',
+        dominio: {
+            nivel1: 'Operaciones',
+            nivel2: 'Backend',
+            nivel3: 'Inventario'
+        },
+        currency_issues: false,
+        disposition: 'Mantener'
+    },
+    {
+        id: 'APL-2',
+        nombre: 'Reporting',
+        descripcion: 'Plataforma de generación de reportes y análisis de datos.',
+        pais: 'USA',
+        segmento: 'Finanzas',
+        dominio: {
+            nivel1: 'Business Intelligence',
+            nivel2: 'Análisis',
+            nivel3: 'Visualización'
+        },
+        currency_issues: true,
+        disposition: 'Actualizar'
+    },
+    {
+        id: 'APL-3',
+        nombre: 'CRM',
+        descripcion: 'Gestión de relaciones con clientes y ciclo de ventas.',
+        pais: 'EMEA',
+        segmento: 'Ventas',
+        dominio: {
+            nivel1: 'Clientes',
+            nivel2: 'Comercial',
+            nivel3: 'Seguimiento'
+        },
+        currency_issues: false,
+        disposition: 'Investigar'
+    }
 ];

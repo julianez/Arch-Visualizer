@@ -14,6 +14,7 @@ import type { Componente } from "@/lib/types";
 import { Edit, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { TypeIcon } from "./type-icon";
+import { useI18n } from "@/context/i18n-context";
 
 interface DataManagerProps {
   components: Componente[];
@@ -22,22 +23,24 @@ interface DataManagerProps {
 }
 
 export function DataManager({ components, onEdit, onDelete }: DataManagerProps) {
+  const { t } = useI18n();
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
-        <CardTitle>Gestión de Componentes</CardTitle>
-        <CardDescription>Añade, edita y elimina componentes de la arquitectura.</CardDescription>
+        <CardTitle>{t('componentManagerTitle')}</CardTitle>
+        <CardDescription>{t('componentManagerDescription')}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 overflow-auto">
         <div className="border rounded-lg">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead className="hidden sm:table-cell">Tipo</TableHead>
-                <TableHead className="hidden md:table-cell">Nivel</TableHead>
-                <TableHead className="hidden lg:table-cell">Padre</TableHead>
-                <TableHead>Acciones</TableHead>
+                <TableHead>{t('name')}</TableHead>
+                <TableHead className="hidden sm:table-cell">{t('type')}</TableHead>
+                <TableHead className="hidden md:table-cell">{t('level')}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t('parent')}</TableHead>
+                <TableHead>{t('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -71,7 +74,7 @@ export function DataManager({ components, onEdit, onDelete }: DataManagerProps) 
               )) : (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
-                    No hay componentes para esta aplicación.
+                    {t('noComponentsForApp')}
                   </TableCell>
                 </TableRow>
               )}
