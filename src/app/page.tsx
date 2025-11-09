@@ -152,14 +152,14 @@ export default function Home() {
     }
     
     const uniqueDispositions = Array.from(new Set(filteredApps.map(a => a.disposition)));
-    const availableDispositions = uniqueDispositions.length > 1 ? ['all', ...uniqueDispositions] : uniqueDispositions;
+    const availableDispositions = ['all', ...uniqueDispositions];
 
     if (filters.disposition !== 'all') {
         filteredApps = filteredApps.filter(app => app.disposition === filters.disposition);
     }
 
     const uniqueCurrencyIssues = Array.from(new Set(filteredApps.map(a => (a.currency_issues ?? false).toString())));
-    const availableCurrencyIssues = uniqueCurrencyIssues.length > 1 ? ['all', ...uniqueCurrencyIssues] : uniqueCurrencyIssues;
+    const availableCurrencyIssues = ['all', ...uniqueCurrencyIssues];
 
     if (filters.currency_issues !== 'all') {
         filteredApps = filteredApps.filter(app => (app.currency_issues ?? false).toString() === filters.currency_issues);
@@ -187,8 +187,8 @@ export default function Home() {
       dominios1: availableDominios1.length > 2 ? availableDominios1 : uniqueDominios1,
       dominios2: availableDominios2.length > 2 ? availableDominios2 : uniqueDominios2,
       dominios3: availableDominios3.length > 2 ? availableDominios3 : uniqueDominios3,
-      dispositions: availableDispositions,
-      currencyIssuesOptions: availableCurrencyIssues,
+      dispositions: availableDispositions.length > 2 ? availableDispositions : uniqueDispositions,
+      currencyIssuesOptions: availableCurrencyIssues.length > 2 ? availableCurrencyIssues : uniqueCurrencyIssues,
       appIds: availableAppIds.length > 2 ? availableAppIds : uniqueAppIds,
       filteredApplications: finalFilteredApps,
       selectedApplication: selectedApp,
@@ -444,5 +444,3 @@ export default function Home() {
     </>
   );
 }
-
-    
