@@ -91,10 +91,10 @@ export default function Home() {
         setLocale(storedLocale as 'en' | 'es');
       }
 
-    } catch (error) => {
+    } catch (error) {
       console.error("Failed to read from localStorage", error);
     }
-  }, []);
+  }, [setLocale]);
 
   useEffect(() => {
     if (isMounted) {
