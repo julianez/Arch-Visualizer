@@ -88,5 +88,10 @@
     "editRelatedAppDescription": "Edit the details of the external application.",
     "addRelatedAppDescription": "Add a new external application to reference in diagrams.",
     "code": "Code",
-    "codePlaceholder": "e.g., ERP-001"
+    "codePlaceholder": "e.g., ERP-001",
+    "noRelatedApps": "No external apps for this application.",
+    "selectApplicationErrorTitle": "Application not selected",
+    "selectApplicationErrorDescription": "Please select a specific application from the filters before adding an item."
 }
+
+    

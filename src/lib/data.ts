@@ -57,6 +57,8 @@ export const initialApplicationData: Aplicacion[] = [
 ];
 
 export const initialRelatedApps: AplicacionRelacionada[] = [
-  { id: 'RA1', codigo: 'ERP-001', nombre: 'Sistema de Contabilidad ERP', tipo: 'AplicacionExterna' },
-  { id: 'RA2', codigo: 'CRM-005', nombre: 'Plataforma de Clientes CRM', tipo: 'AplicacionExterna' }
+  { id: 'RA1', codigo: 'ERP-001', nombre: 'Sistema de Contabilidad ERP', tipo: 'AplicacionExterna', aplicacionId: 'APL-1' },
+  { id: 'RA2', codigo: 'CRM-005', nombre: 'Plataforma de Clientes CRM', tipo: 'AplicacionExterna', aplicacionId: 'APL-3' }
 ];
+
+    

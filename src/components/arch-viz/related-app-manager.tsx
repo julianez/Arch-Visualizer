@@ -31,6 +31,7 @@ export function RelatedAppManager({ relatedApps, onEdit, onDelete }: RelatedAppM
           <TableRow>
             <TableHead>{t('name')}</TableHead>
             <TableHead className="hidden sm:table-cell">{t('code')}</TableHead>
+             <TableHead className="hidden md:table-cell">{t('applicationId')}</TableHead>
             <TableHead>{t('actions')}</TableHead>
           </TableRow>
         </TableHeader>
@@ -47,6 +48,7 @@ export function RelatedAppManager({ relatedApps, onEdit, onDelete }: RelatedAppM
                 </div>
               </TableCell>
               <TableCell className="hidden sm:table-cell">{app.codigo}</TableCell>
+              <TableCell className="hidden md:table-cell">{app.aplicacionId}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="icon" onClick={() => onEdit(app)} aria-label={`Edit ${app.nombre}`}>
@@ -60,7 +62,7 @@ export function RelatedAppManager({ relatedApps, onEdit, onDelete }: RelatedAppM
             </TableRow>
           )) : (
             <TableRow>
-              <TableCell colSpan={3} className="h-24 text-center">
+              <TableCell colSpan={4} className="h-24 text-center">
                 {t('noRelatedApps')}
               </TableCell>
             </TableRow>
@@ -70,3 +72,5 @@ export function RelatedAppManager({ relatedApps, onEdit, onDelete }: RelatedAppM
     </div>
   );
 }
+
+    

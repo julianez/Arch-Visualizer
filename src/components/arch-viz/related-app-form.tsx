@@ -31,6 +31,7 @@ const formSchema = z.object({
   codigo: z.string().min(1, "Código es requerido."),
   nombre: z.string().min(1, "Nombre es requerido."),
   tipo: z.literal('AplicacionExterna'),
+  aplicacionId: z.string().min(1, "ID de Aplicación es requerido."),
 });
 
 interface RelatedAppFormProps {
@@ -39,9 +40,10 @@ interface RelatedAppFormProps {
   onSubmit: (data: AplicacionRelacionada) => void;
   app: AplicacionRelacionada | null;
   existingIds: string[];
+  applicationId: string;
 }
 
-export function RelatedAppForm({ isOpen, onClose, onSubmit, app, existingIds }: RelatedAppFormProps) {
+export function RelatedAppForm({ isOpen, onClose, onSubmit, app, existingIds, applicationId }: RelatedAppFormProps) {
   const { t } = useI18n();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,6 +52,7 @@ export function RelatedAppForm({ isOpen, onClose, onSubmit, app, existingIds }: 
       codigo: '',
       nombre: '',
       tipo: 'AplicacionExterna',
+      aplicacionId: applicationId,
     },
   });
 
@@ -59,8 +62,9 @@ export function RelatedAppForm({ isOpen, onClose, onSubmit, app, existingIds }: 
       codigo: '',
       nombre: '',
       tipo: 'AplicacionExterna',
+      aplicacionId: applicationId,
     });
-  }, [app, form, isOpen]);
+  }, [app, form, isOpen, applicationId]);
 
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
     if (!app && existingIds.includes(values.id)) {
@@ -121,6 +125,19 @@ export function RelatedAppForm({ isOpen, onClose, onSubmit, app, existingIds }: 
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="aplicacionId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>{t('applicationId')}</FormLabel>
+                  <FormControl>
+                    <Input placeholder={t('applicationIdPlaceholder')} {...field} disabled={true} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={onClose}>{t('cancel')}</Button>
               <Button type="submit">{t('save')}</Button>
@@ -131,3 +148,5 @@ export function RelatedAppForm({ isOpen, onClose, onSubmit, app, existingIds }: 
     </Dialog>
   );
 }
+
+    

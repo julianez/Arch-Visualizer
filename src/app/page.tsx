@@ -63,9 +63,9 @@ export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   
   // Data States
-  const [components, setComponents] = useState<Componente[]>(initialComponentData);
-  const [applications, setApplications] = useState<Aplicacion[]>(initialApplicationData);
-  const [relatedApps, setRelatedApps] = useState<AplicacionRelacionada[]>(initialRelatedApps);
+  const [components, setComponents] = useState<Componente[]>([]);
+  const [applications, setApplications] = useState<Aplicacion[]>([]);
+  const [relatedApps, setRelatedApps] = useState<AplicacionRelacionada[]>([]);
 
   // Filter States
   const [filters, setFilters] = useState<Filters>({
@@ -131,7 +131,8 @@ export default function Home() {
     appIds,
     filteredApplications,
     selectedApplication,
-    filteredComponentsForApp
+    filteredComponentsForApp,
+    filteredRelatedAppsForApp,
   } = useMemo(() => {
     let filteredApps = [...applications];
 
@@ -166,10 +167,15 @@ export default function Home() {
       ? components.filter(c => filteredAppIds.has(c.aplicacionId))
       : components.filter(c => c.aplicacionId === filters.aplicacionId);
 
-    const finalFilteredAppIds = new Set(finalFilteredComponents.map(c => c.aplicacionId));
+    let finalFilteredRelatedApps = filters.aplicacionId === 'all'
+      ? relatedApps.filter(ra => filteredAppIds.has(ra.aplicacionId))
+      : relatedApps.filter(ra => ra.aplicacionId === filters.aplicacionId);
+
+    const finalFilteredAppIds = new Set([...finalFilteredComponents.map(c => c.aplicacionId), ...finalFilteredRelatedApps.map(ra => ra.aplicacionId)]);
+    
     let finalFilteredApps = applications.filter(app => finalFilteredAppIds.has(app.id));
 
-    if(finalFilteredComponents.length === 0 && filters.aplicacionId === 'all'){
+    if(finalFilteredComponents.length === 0 && finalFilteredRelatedApps.length === 0 && filters.aplicacionId === 'all'){
       finalFilteredApps = filteredApps;
     }
 
@@ -193,13 +199,14 @@ export default function Home() {
       filteredApplications: finalFilteredApps,
       selectedApplication: selectedApp,
       filteredComponentsForApp: finalFilteredComponents,
+      filteredRelatedAppsForApp: finalFilteredRelatedApps,
     };
-  }, [applications, components, filters]);
+  }, [applications, components, relatedApps, filters]);
 
   const diagramEntities = useMemo(() => {
-    const combinedList = [...filteredComponentsForApp, ...relatedApps];
+    const combinedList = [...filteredComponentsForApp, ...filteredRelatedAppsForApp];
     return combinedList.filter(entity => visibleTypes.includes(entity.tipo));
-  }, [filteredComponentsForApp, relatedApps, visibleTypes]);
+  }, [filteredComponentsForApp, filteredRelatedAppsForApp, visibleTypes]);
 
 
   useEffect(() => {
@@ -261,11 +268,27 @@ export default function Home() {
   }
 
   const handleAddComponent = () => {
+    if (filters.aplicacionId === 'all') {
+      toast({
+        variant: 'destructive',
+        title: t('selectApplicationErrorTitle'),
+        description: t('selectApplicationErrorDescription')
+      });
+      return;
+    }
     setEditingComponent(null);
     setIsComponentFormOpen(true);
   };
   
   const handleAddRelatedApp = () => {
+    if (filters.aplicacionId === 'all') {
+      toast({
+        variant: 'destructive',
+        title: t('selectApplicationErrorTitle'),
+        description: t('selectApplicationErrorDescription')
+      });
+      return;
+    }
     setEditingRelatedApp(null);
     setIsRelatedAppFormOpen(true);
   }
@@ -466,7 +489,7 @@ export default function Home() {
                               {t('addRelatedApp')}
                           </Button>
                           <RelatedAppManager 
-                              relatedApps={relatedApps}
+                              relatedApps={filteredRelatedAppsForApp}
                               onEdit={handleEditRelatedApp}
                               onDelete={(app) => handleDeleteItem(app, 'relatedApp')}
                           />
@@ -491,6 +514,7 @@ export default function Home() {
         component={editingComponent}
         allComponents={components}
         allRelatedApps={relatedApps}
+        applicationId={filters.aplicacionId}
       />
       
       <RelatedAppForm
@@ -499,6 +523,7 @@ export default function Home() {
         onSubmit={handleRelatedAppFormSubmit}
         app={editingRelatedApp}
         existingIds={[...components.map(c => c.id), ...relatedApps.map(a => a.id)]}
+        applicationId={filters.aplicacionId}
       />
 
       <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
@@ -520,3 +545,5 @@ export default function Home() {
     </>
   );
 }
+
+    

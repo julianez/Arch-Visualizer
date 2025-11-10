@@ -30,4 +30,7 @@ export interface AplicacionRelacionada {
   codigo: string;
   nombre: string;
   tipo: 'AplicacionExterna';
+  aplicacionId: string;
 }
+
+    

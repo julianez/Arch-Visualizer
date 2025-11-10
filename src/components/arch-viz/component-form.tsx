@@ -50,16 +50,17 @@ interface ComponentFormProps {
   component: Componente | null;
   allComponents: Componente[];
   allRelatedApps: AplicacionRelacionada[];
+  applicationId: string;
 }
 
-export function ComponentForm({ isOpen, onClose, onSubmit, component, allComponents, allRelatedApps }: ComponentFormProps) {
+export function ComponentForm({ isOpen, onClose, onSubmit, component, allComponents, allRelatedApps, applicationId }: ComponentFormProps) {
   const { t } = useI18n();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: component ? { ...component, padreId: component.padreId || '' } : {
       id: '',
       nombre: '',
-      aplicacionId: '',
+      aplicacionId: applicationId,
       padreId: '',
       tipo: 'Componente',
       nivel: 1,
@@ -70,22 +71,23 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
     form.reset(component ? { ...component, padreId: component.padreId || '' } : {
       id: '',
       nombre: '',
-      aplicacionId: '',
+      aplicacionId: applicationId,
       padreId: '',
       tipo: 'Componente',
       nivel: 1,
     });
-  }, [component, form, isOpen]);
+  }, [component, form, isOpen, applicationId]);
 
-  const aplicacionId = form.watch('aplicacionId');
+  const currentAplicacionId = form.watch('aplicacionId');
   const currentId = form.getValues('id');
 
   const parentOptions = React.useMemo(() => {
-    const internalParents = aplicacionId
-      ? allComponents.filter(c => c.aplicacionId === aplicacionId && c.id !== currentId)
+    const internalParents = currentAplicacionId
+      ? allComponents.filter(c => c.aplicacionId === currentAplicacionId && c.id !== currentId)
       : [];
-    return [...internalParents, ...allRelatedApps];
-  }, [aplicacionId, allComponents, allRelatedApps, currentId]);
+    const relatedParents = allRelatedApps.filter(ra => ra.aplicacionId === currentAplicacionId);
+    return [...internalParents, ...relatedParents];
+  }, [currentAplicacionId, allComponents, allRelatedApps, currentId]);
 
 
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
@@ -137,7 +139,7 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
                 <FormItem>
                   <FormLabel>{t('applicationId')}</FormLabel>
                   <FormControl>
-                    <Input placeholder={t('applicationIdPlaceholder')} {...field} />
+                    <Input placeholder={t('applicationIdPlaceholder')} {...field} disabled={true}/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -211,3 +213,5 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
     </Dialog>
   );
 }
+
+    
