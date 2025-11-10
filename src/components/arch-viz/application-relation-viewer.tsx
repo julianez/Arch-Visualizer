@@ -4,24 +4,30 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from 'lucide-react';
-import type { Aplicacion } from '@/lib/types';
+import type { Aplicacion, Componente, AplicacionRelacion } from '@/lib/types';
+import { initialAppRelations } from '@/lib/data';
 import { Skeleton } from '../ui/skeleton';
 import plantumlEncoder from 'plantuml-encoder';
 import Image from 'next/image';
 import { useI18n } from '@/context/i18n-context';
 
 interface ApplicationRelationViewerProps {
+  components: Componente[];
   allApplications: Aplicacion[];
-  filteredApplications: Aplicacion[];
 }
 
 const generatePlantUmlCode = (
-  filteredApplications: Aplicacion[],
+  components: Componente[],
+  allApplications: Aplicacion[],
+  relations: AplicacionRelacion[],
   t: (key: string) => string
 ) => {
-  if (filteredApplications.length === 0) {
+  const visibleAppIds = new Set(components.map(c => c.aplicacionId));
+  if (visibleAppIds.size === 0) {
     return `@startuml\n' ${t('noAppsForFilters')}\n@enduml`;
   }
+
+  const visibleApps = allApplications.filter(app => visibleAppIds.has(app.id));
 
   let puml = `@startuml AppRelations\n`;
   puml += `!theme plain\n`;
@@ -29,30 +35,18 @@ const generatePlantUmlCode = (
   puml += `skinparam shadowing false\n`;
   puml += `skinparam rectangle {\n  RoundCorner 20\n  BackgroundColor LightBlue\n}\n`;
 
-  const filteredAppIds = new Set(filteredApplications.map(app => app.id));
-
-  // 1. Define all applications in the filter scope as rectangles
-  filteredApplications.forEach(app => {
+  // 1. Define all visible applications as rectangles
+  visibleApps.forEach(app => {
     puml += `rectangle "[${app.id}]\\n${app.nombre.replace(/"/g, "''")}" as ${app.id}\n`;
   });
 
   puml += '\n';
 
-  // 2. Define relationships as lines
-  const drawnRelations = new Set<string>();
-  filteredApplications.forEach(app => {
-    if (app.relaciones) {
-      app.relaciones.forEach(targetId => {
-        // Draw relation only if target is also in the filter scope
-        if (filteredAppIds.has(targetId)) {
-          // Sort to create a consistent key and avoid duplicates (A-B is same as B-A)
-          const relationKey = [app.id, targetId].sort().join('--');
-          if (!drawnRelations.has(relationKey)) {
-            puml += `${app.id} -- ${targetId}\n`;
-            drawnRelations.add(relationKey);
-          }
-        }
-      });
+  // 2. Define relationships as arrows
+  relations.forEach(rel => {
+    // Draw relation only if both source and target are visible
+    if (visibleAppIds.has(rel.sourceAppId) && visibleAppIds.has(rel.targetAppId)) {
+      puml += `${rel.sourceAppId} --> ${rel.targetAppId} : ${rel.description.replace(/"/g, "''")}\n`;
     }
   });
 
@@ -61,7 +55,7 @@ const generatePlantUmlCode = (
 };
 
 
-export function ApplicationRelationViewer({ allApplications, filteredApplications }: ApplicationRelationViewerProps) {
+export function ApplicationRelationViewer({ components, allApplications }: ApplicationRelationViewerProps) {
   const { t } = useI18n();
   const [isCopied, setIsCopied] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -72,7 +66,7 @@ export function ApplicationRelationViewer({ allApplications, filteredApplication
     setIsClient(true);
   }, []);
 
-  const plantUmlCode = useMemo(() => generatePlantUmlCode(filteredApplications, t), [filteredApplications, t]);
+  const plantUmlCode = useMemo(() => generatePlantUmlCode(components, allApplications, initialAppRelations, t), [components, allApplications, t]);
 
   useEffect(() => {
     if (isClient) {
@@ -95,6 +89,8 @@ export function ApplicationRelationViewer({ allApplications, filteredApplication
     });
   };
 
+  const hasVisibleApps = components.length > 0;
+
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
@@ -108,7 +104,7 @@ export function ApplicationRelationViewer({ allApplications, filteredApplication
             <Skeleton className="h-4 w-[200px]" />
             <Skeleton className="h-32 w-full" />
           </div>
-        ) : diagramUrl && filteredApplications.length > 0 ? (
+        ) : diagramUrl && hasVisibleApps ? (
             <Image 
               src={diagramUrl} 
               alt={t('appRelationships')}
@@ -123,7 +119,7 @@ export function ApplicationRelationViewer({ allApplications, filteredApplication
         )}
       </CardContent>
       <CardFooter>
-        <Button onClick={handleCopy} className="w-full" variant="secondary" disabled={filteredApplications.length === 0}>
+        <Button onClick={handleCopy} className="w-full" variant="secondary" disabled={!hasVisibleApps}>
           {isCopied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
           {isCopied ? t('copied') : t('copyCode')}
         </Button>

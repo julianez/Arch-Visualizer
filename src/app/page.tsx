@@ -5,6 +5,7 @@ import { initialComponentData, initialApplicationData } from '@/lib/data';
 import type { Componente, Aplicacion } from '@/lib/types';
 import { DataManager } from '@/components/arch-viz/data-manager';
 import { DiagramViewer } from '@/components/arch-viz/diagram-viewer';
+import { ApplicationRelationViewer } from '@/components/arch-viz/application-relation-viewer';
 import { ComponentForm } from '@/components/arch-viz/component-form';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,6 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useI18n } from '@/context/i18n-context';
 import {
   DropdownMenu,
@@ -333,13 +335,13 @@ export default function Home() {
                     <SelectTrigger><SelectValue placeholder={t('applicationPlaceholder')} /></SelectTrigger>
                     <SelectContent>{appIds.map(id => <SelectItem key={id} value={id}>{id === 'all' ? t('allApplications') : id}</SelectItem>)}</SelectContent>
                 </Select>
-                <div className="flex gap-2 col-span-2">
+                <div className="flex gap-2 col-span-2 md:col-span-1">
                   <Button onClick={resetFilters} variant="ghost" className="w-full"><FilterX className="mr-2 h-4 w-4" /> {t('clearFilters')}</Button>
                 </div>
             </div>
         </div>
 
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 overflow-hidden">
+        <Tabs defaultValue="components" className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 overflow-hidden">
           <div className="flex flex-col gap-6 overflow-y-auto rounded-lg">
              <Card>
                 <CardContent className="p-4">
@@ -373,13 +375,25 @@ export default function Home() {
             />
           </div>
           <div className="flex flex-col overflow-hidden rounded-lg">
-            <DiagramViewer 
-              components={filteredComponents} 
-              application={selectedApplication} 
-              filteredApplications={filteredApplications}
-            />
+             <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="components">{t('componentDiagramTab')}</TabsTrigger>
+                <TabsTrigger value="relations">{t('relationDiagramTab')}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="components" className="flex-1 mt-0">
+                <DiagramViewer 
+                components={filteredComponents} 
+                application={selectedApplication} 
+                filteredApplications={filteredApplications}
+                />
+            </TabsContent>
+            <TabsContent value="relations" className="flex-1 mt-0">
+                <ApplicationRelationViewer 
+                components={filteredComponents}
+                allApplications={applications}
+                />
+            </TabsContent>
           </div>
-        </div>
+        </Tabs>
       </main>
 
       <ComponentForm

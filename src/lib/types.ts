@@ -13,7 +13,6 @@ export interface Aplicacion {
   dominio: Dominio;
 }
 
-
 export interface Componente {
   id: string;
   nombre: string;
@@ -21,6 +20,12 @@ export interface Componente {
   padreId: string | null;
   tipo: string;
   nivel: number;
+}
+
+export interface AplicacionRelacion {
+  sourceAppId: string;
+  targetAppId: string;
+  description: string;
 }
 
 export const componentTypes = ['Componente', 'Servicio', 'Módulo', 'Clase'];

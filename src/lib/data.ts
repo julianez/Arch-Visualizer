@@ -1,4 +1,4 @@
-import type { Componente, Aplicacion } from './types';
+import type { Componente, Aplicacion, AplicacionRelacion } from './types';
 
 export const initialComponentData: Componente[] = [
   // Aplicación 1: Core System
@@ -53,4 +53,9 @@ export const initialApplicationData: Aplicacion[] = [
             nivel3: 'Seguimiento'
         },
     }
+];
+
+export const initialAppRelations: AplicacionRelacion[] = [
+  { sourceAppId: 'APL-1', targetAppId: 'APL-2', description: 'Envía datos para reportes' },
+  { sourceAppId: 'APL-3', targetAppId: 'APL-1', description: 'Consulta info de productos' },
 ];
