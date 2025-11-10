@@ -1,5 +1,5 @@
 
-import type { Componente, Aplicacion, AplicacionRelacionada } from './types';
+import type { Componente, Aplicacion, AplicacionRelacionada, AplicacionRelacion } from './types';
 
 export const initialComponentData: Componente[] = [
   // Aplicación 1: Core System
@@ -61,4 +61,8 @@ export const initialRelatedApps: AplicacionRelacionada[] = [
   { id: 'RA2', codigo: 'CRM-005', nombre: 'Plataforma de Clientes CRM', tipo: 'AplicacionExterna', aplicacionId: 'APL-3' }
 ];
 
+export const initialAppRelations: AplicacionRelacion[] = [
+    { sourceAppId: 'APL-1', targetAppId: 'APL-3', description: 'Sincroniza datos de clientes' },
+    { sourceAppId: 'APL-2', targetAppId: 'APL-1', description: 'Consume datos de inventario' }
+];
     
