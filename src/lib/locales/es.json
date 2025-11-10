@@ -67,10 +67,5 @@
     "architectureDiagramFor": "Diagrama de arquitectura para {appName}",
     "noComponentsForFilters": "No hay componentes para mostrar con los filtros actuales.",
     "copied": "¡Copiado!",
-    "copyCode": "Copiar Código",
-    "currency_issues": "Currency Issues",
-    "Sí": "Sí",
-    "No": "No",
-    "currencyPlaceholder": "Currency Issues...",
-    "allCurrencies": "Todos"
+    "copyCode": "Copiar Código"
 }

@@ -41,7 +41,6 @@ type Filters = {
   dominio1: string | 'all';
   dominio2: string | 'all';
   dominio3: string | 'all';
-  currency_issues: string | 'all';
   aplicacionId: string | 'all';
 };
 
@@ -57,7 +56,6 @@ export default function Home() {
     dominio1: 'all',
     dominio2: 'all',
     dominio3: 'all',
-    currency_issues: 'all',
     aplicacionId: 'all',
   });
   
@@ -110,7 +108,6 @@ export default function Home() {
     dominios1,
     dominios2,
     dominios3,
-    currencyIssuesOptions,
     appIds,
     filteredApplications,
     selectedApplication,
@@ -142,12 +139,6 @@ export default function Home() {
       filteredApps = filteredApps.filter(app => app.dominio.nivel3 === filters.dominio3);
     }
     
-    const uniqueCurrencyIssues = Array.from(new Set(filteredApps.map(a => a.currency_issues).filter(Boolean)));
-
-    if (filters.currency_issues !== 'all') {
-        filteredApps = filteredApps.filter(app => app.currency_issues === filters.currency_issues);
-    }
-
     const filteredAppIds = new Set(filteredApps.map(app => app.id));
     const uniqueAppIds = Array.from(filteredAppIds);
 
@@ -168,15 +159,6 @@ export default function Home() {
       if (options.length > 2) return options;
       return uniqueValues.length === 1 ? uniqueValues : options;
     }
-    
-    const createCurrencyOptions = (uniqueValues: string[]) => {
-      const allPossibleValues = ['Sí', 'No'];
-      const presentValues = allPossibleValues.filter(val => uniqueValues.includes(val));
-      const options = ['all', ...presentValues];
-
-      if (presentValues.length < 2) return options;
-      return options;
-    }
 
     return {
       paises: ['all', ...Array.from(new Set(applications.map(a => a.pais)))],
@@ -184,7 +166,6 @@ export default function Home() {
       dominios1: createOptions(uniqueDominios1),
       dominios2: createOptions(uniqueDominios2),
       dominios3: createOptions(uniqueDominios3),
-      currencyIssuesOptions: createCurrencyOptions(Array.from(new Set(applications.map(a => a.currency_issues)))),
       appIds: createOptions(uniqueAppIds),
       filteredApplications: finalFilteredApps,
       selectedApplication: selectedApp,
@@ -205,16 +186,10 @@ export default function Home() {
     if (dominios3.length === 1 && filters.dominio3 !== dominios3[0]) {
       handleFilterChange('dominio3', dominios3[0]);
     }
-    if (currencyIssuesOptions.length === 2 && filters.currency_issues === 'all') {
-      // Don't auto-select if 'all' is a valid choice with other options
-    } else if (currencyIssuesOptions.length === 1 && filters.currency_issues !== currencyIssuesOptions[0]) {
-      handleFilterChange('currency_issues', currencyIssuesOptions[0]);
-    }
-    
     if (appIds.length === 1 && filters.aplicacionId !== appIds[0]) {
       handleFilterChange('aplicacionId', appIds[0]);
     }
-  }, [segmentos, dominios1, dominios2, dominios3, currencyIssuesOptions, appIds, filters]);
+  }, [segmentos, dominios1, dominios2, dominios3, appIds, filters]);
 
 
   const handleFilterChange = (filterName: keyof Filters, value: string) => {
@@ -222,13 +197,13 @@ export default function Home() {
       const newFilters: Filters = { ...prevFilters, [filterName]: value };
       
       const resetCascadingFilters = (startIndex: number) => {
-        const filterNames: (keyof Filters)[] = ['pais', 'segmento', 'dominio1', 'dominio2', 'dominio3', 'currency_issues', 'aplicacionId'];
+        const filterNames: (keyof Filters)[] = ['pais', 'segmento', 'dominio1', 'dominio2', 'dominio3', 'aplicacionId'];
         for (let i = startIndex; i < filterNames.length; i++) {
           newFilters[filterNames[i]] = 'all';
         }
       }
 
-      const filterHierarchy: (keyof Filters)[] = ['pais', 'segmento', 'dominio1', 'dominio2', 'dominio3', 'currency_issues'];
+      const filterHierarchy: (keyof Filters)[] = ['pais', 'segmento', 'dominio1', 'dominio2', 'dominio3'];
       const currentIndex = filterHierarchy.indexOf(filterName);
 
       if(currentIndex !== -1) {
@@ -246,7 +221,6 @@ export default function Home() {
       dominio1: 'all',
       dominio2: 'all',
       dominio3: 'all',
-      currency_issues: 'all',
       aplicacionId: 'all',
     });
   }
@@ -349,19 +323,11 @@ export default function Home() {
                     <SelectTrigger><SelectValue placeholder={t('domain3Placeholder')} /></SelectTrigger>
                     <SelectContent>{dominios3.map(d => <SelectItem key={d} value={d}>{d === 'all' ? t('allDomainsN3') : d}</SelectItem>)}</SelectContent>
                 </Select>
-                 <Select onValueChange={(v) => handleFilterChange('currency_issues', v)} value={filters.currency_issues}>
-                    <SelectTrigger><SelectValue placeholder={t('currencyPlaceholder')} /></SelectTrigger>
-                    <SelectContent>
-                      {currencyIssuesOptions.map(c => 
-                        <SelectItem key={c} value={c}>{c === 'all' ? t('allCurrencies') : t(c)}</SelectItem>
-                      )}
-                    </SelectContent>
-                </Select>
                 <Select onValueChange={(v) => handleFilterChange('aplicacionId', v)} value={filters.aplicacionId}>
                     <SelectTrigger><SelectValue placeholder={t('applicationPlaceholder')} /></SelectTrigger>
                     <SelectContent>{appIds.map(id => <SelectItem key={id} value={id}>{id === 'all' ? t('allApplications') : id}</SelectItem>)}</SelectContent>
                 </Select>
-                <div className="flex gap-2">
+                <div className="flex gap-2 col-span-2">
                   <Button onClick={resetFilters} variant="ghost" className="w-full"><FilterX className="mr-2 h-4 w-4" /> {t('clearFilters')}</Button>
                 </div>
             </div>
@@ -387,7 +353,6 @@ export default function Home() {
                         <div><strong>{t('domainN1')}:</strong> {selectedApplication.dominio.nivel1}</div>
                         <div><strong>{t('domainN2')}:</strong> {selectedApplication.dominio.nivel2}</div>
                         <div><strong>{t('domainN3')}:</strong> {selectedApplication.dominio.nivel3}</div>
-                        <div><strong>{t('currency_issues')}:</strong> {t(selectedApplication.currency_issues)}</div>
                      </div>
                   )}
                   {filteredApplications.length > 1 && <p className="mt-2 text-sm text-muted-foreground">{t('multipleApplicationsMatch', { count: filteredApplications.length })}</p>}

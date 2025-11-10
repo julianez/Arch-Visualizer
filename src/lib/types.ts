@@ -11,7 +11,6 @@ export interface Aplicacion {
   pais: string;
   segmento: string;
   dominio: Dominio;
-  currency_issues: 'Sí' | 'No';
 }
 
 
