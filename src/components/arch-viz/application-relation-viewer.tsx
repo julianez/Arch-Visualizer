@@ -27,7 +27,8 @@ const generatePlantUmlCode = (
   let puml = `@startuml AppRelations\n`;
   puml += `!theme plain\n`;
   puml += `title ${t('appRelationships')}\n\n`;
-  puml += `skinparam rectangle {\n  RoundCorner 20\n  BackgroundColor SkyBlue\n  BorderColor DarkBlue\n}\n`;
+  puml += `skinparam shadowing false\n`;
+  puml += `skinparam rectangle {\n  RoundCorner 20\n  BackgroundColor LightBlue\n}\n`;
 
   const filteredAppIds = new Set(filteredApplications.map(app => app.id));
 
