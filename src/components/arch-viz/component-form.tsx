@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -29,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Componente } from "@/lib/types";
+import type { Componente, AplicacionRelacionada } from "@/lib/types";
 import { componentTypes } from "@/lib/types";
 import { useI18n } from "@/context/i18n-context";
 
@@ -48,9 +49,10 @@ interface ComponentFormProps {
   onSubmit: (data: Componente) => void;
   component: Componente | null;
   allComponents: Componente[];
+  allRelatedApps: AplicacionRelacionada[];
 }
 
-export function ComponentForm({ isOpen, onClose, onSubmit, component, allComponents }: ComponentFormProps) {
+export function ComponentForm({ isOpen, onClose, onSubmit, component, allComponents, allRelatedApps }: ComponentFormProps) {
   const { t } = useI18n();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -78,9 +80,13 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
   const aplicacionId = form.watch('aplicacionId');
   const currentId = form.getValues('id');
 
-  const parentOptions = aplicacionId
-    ? allComponents.filter(c => c.aplicacionId === aplicacionId && c.id !== currentId)
-    : [];
+  const parentOptions = React.useMemo(() => {
+    const internalParents = aplicacionId
+      ? allComponents.filter(c => c.aplicacionId === aplicacionId && c.id !== currentId)
+      : [];
+    return [...internalParents, ...allRelatedApps];
+  }, [aplicacionId, allComponents, allRelatedApps, currentId]);
+
 
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
     onSubmit({ ...values, padreId: values.padreId || null });
@@ -143,7 +149,7 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>{t('parent')}</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value ?? ''}>
+                  <Select onValueChange={field.onChange} value={field.value ?? ''}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder={t('parentPlaceholder')} />

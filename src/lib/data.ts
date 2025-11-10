@@ -1,18 +1,19 @@
-import type { Componente, Aplicacion } from './types';
+
+import type { Componente, Aplicacion, AplicacionRelacionada } from './types';
 
 export const initialComponentData: Componente[] = [
   // Aplicación 1: Core System
   { id: 'A1', nombre: 'Microservicio Core', aplicacionId: 'APL-1', padreId: null, tipo: 'Componente', nivel: 1 },
   { id: 'A2', nombre: 'API de Productos', aplicacionId: 'APL-1', padreId: 'A1', tipo: 'Servicio', nivel: 2 },
   { id: 'A3', nombre: 'Módulo de Inventario', aplicacionId: 'APL-1', padreId: 'A2', tipo: 'Módulo', nivel: 3 },
-  { id: 'A4', nombre: 'Base de Datos SQL', aplicacionId: 'APL-1', padreId: 'A1', tipo: 'Clase', nivel: 2 },
+  { id: 'A4', nombre: 'Base de Datos SQL', aplicacionId: 'APL-1', padreId: 'RA1', tipo: 'Clase', nivel: 2 }, // Relacionado con RA1
 
   // Aplicación 2: Reporting
   { id: 'B1', nombre: 'Servidor de Reportes', aplicacionId: 'APL-2', padreId: null, tipo: 'Componente', nivel: 1 },
   { id: 'B2', nombre: 'Exportador PDF', aplicacionId: 'APL-2', padreId: 'B1', tipo: 'Servicio', nivel: 2 },
 
   // Aplicación 3: CRM
-  { id: 'C1', nombre: 'Interfaz de Cliente', aplicacionId: 'APL-3', padreId: null, tipo: 'Componente', nivel: 1 },
+  { id: 'C1', nombre: 'Interfaz de Cliente', aplicacionId: 'APL-3', padreId: 'RA2', tipo: 'Componente', nivel: 1 }, // Relacionado con RA2
   { id: 'C2', nombre: 'Gestor de Contactos', aplicacionId: 'APL-3', padreId: 'C1', tipo: 'Servicio', nivel: 2 }
 ];
 
@@ -53,4 +54,9 @@ export const initialApplicationData: Aplicacion[] = [
             nivel3: 'Seguimiento'
         },
     }
+];
+
+export const initialRelatedApps: AplicacionRelacionada[] = [
+  { id: 'RA1', codigo: 'ERP-001', nombre: 'Sistema de Contabilidad ERP', tipo: 'AplicacionExterna' },
+  { id: 'RA2', codigo: 'CRM-005', nombre: 'Plataforma de Clientes CRM', tipo: 'AplicacionExterna' }
 ];

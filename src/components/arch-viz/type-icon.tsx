@@ -1,7 +1,8 @@
+
 'use client';
 
 import React from 'react';
-import { Box, Circle, Puzzle, FileCode, Minus } from 'lucide-react';
+import { Box, Circle, Puzzle, FileCode, Minus, Building } from 'lucide-react';
 
 interface TypeIconProps {
   type: string;
@@ -23,6 +24,8 @@ export function TypeIcon({ type, className }: TypeIconProps) {
       return <Puzzle {...props} />;
     case 'Clase':
       return <FileCode {...props} />;
+    case 'AplicacionExterna':
+      return <Building {...props} />;
     default:
       return <Minus {...props} />;
   }

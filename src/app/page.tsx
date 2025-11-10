@@ -1,11 +1,15 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { initialComponentData, initialApplicationData } from '@/lib/data';
-import type { Componente, Aplicacion } from '@/lib/types';
+import { initialComponentData, initialApplicationData, initialRelatedApps } from '@/lib/data';
+import type { Componente, Aplicacion, AplicacionRelacionada } from '@/lib/types';
+import { componentTypes } from '@/lib/types';
 import { DataManager } from '@/components/arch-viz/data-manager';
+import { RelatedAppManager } from '@/components/arch-viz/related-app-manager';
 import { DiagramViewer } from '@/components/arch-viz/diagram-viewer';
 import { ComponentForm } from '@/components/arch-viz/component-form';
+import { RelatedAppForm } from '@/components/arch-viz/related-app-form';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -14,7 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PlusCircle, DraftingCompass, FilterX, Languages } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { PlusCircle, DraftingCompass, FilterX, Languages, SlidersHorizontal } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +31,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from '@/components/ui/card';
 import { useI18n } from '@/context/i18n-context';
@@ -45,12 +57,17 @@ type Filters = {
   aplicacionId: string | 'all';
 };
 
+const allEntityTypes = [...componentTypes, 'AplicacionExterna'];
 
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
+  
+  // Data States
   const [components, setComponents] = useState<Componente[]>(initialComponentData);
   const [applications, setApplications] = useState<Aplicacion[]>(initialApplicationData);
-  
+  const [relatedApps, setRelatedApps] = useState<AplicacionRelacionada[]>(initialRelatedApps);
+
+  // Filter States
   const [filters, setFilters] = useState<Filters>({
     pais: 'all',
     segmento: 'all',
@@ -59,10 +76,15 @@ export default function Home() {
     dominio3: 'all',
     aplicacionId: 'all',
   });
-  
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [visibleTypes, setVisibleTypes] = useState<string[]>(allEntityTypes);
+
+  // UI States
+  const [isComponentFormOpen, setIsComponentFormOpen] = useState(false);
+  const [isRelatedAppFormOpen, setIsRelatedAppFormOpen] = useState(false);
   const [editingComponent, setEditingComponent] = useState<Componente | null>(null);
-  const [componentToDelete, setComponentToDelete] = useState<Componente | null>(null);
+  const [editingRelatedApp, setEditingRelatedApp] = useState<AplicacionRelacionada | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<{item: Componente | AplicacionRelacionada, type: 'component' | 'relatedApp'} | null>(null);
+
   const { toast } = useToast();
   const { t, setLocale, locale } = useI18n();
 
@@ -71,16 +93,12 @@ export default function Home() {
     try {
       const storedComponents = window.localStorage.getItem('archviz-components');
       const storedApps = window.localStorage.getItem('archviz-apps');
-      if (storedComponents) {
-        setComponents(JSON.parse(storedComponents));
-      } else {
-        window.localStorage.setItem('archviz-components', JSON.stringify(initialComponentData));
-      }
-      if (storedApps) {
-        setApplications(JSON.parse(storedApps));
-      } else {
-        window.localStorage.setItem('archviz-apps', JSON.stringify(initialApplicationData));
-      }
+      const storedRelatedApps = window.localStorage.getItem('archviz-related-apps');
+      
+      setComponents(storedComponents ? JSON.parse(storedComponents) : initialComponentData);
+      setApplications(storedApps ? JSON.parse(storedApps) : initialApplicationData);
+      setRelatedApps(storedRelatedApps ? JSON.parse(storedRelatedApps) : initialRelatedApps);
+      
       const storedLocale = window.localStorage.getItem('archviz-locale');
       if (storedLocale) {
         setLocale(storedLocale as 'en' | 'es');
@@ -96,12 +114,13 @@ export default function Home() {
       try {
         window.localStorage.setItem('archviz-components', JSON.stringify(components));
         window.localStorage.setItem('archviz-apps', JSON.stringify(applications));
+        window.localStorage.setItem('archviz-related-apps', JSON.stringify(relatedApps));
         window.localStorage.setItem('archviz-locale', locale);
       } catch (error) {
         console.error("Failed to write to localStorage", error);
       }
     }
-  }, [components, applications, isMounted, locale]);
+  }, [components, applications, relatedApps, isMounted, locale]);
 
   const {
     paises,
@@ -112,7 +131,7 @@ export default function Home() {
     appIds,
     filteredApplications,
     selectedApplication,
-    filteredComponents
+    filteredComponentsForApp
   } = useMemo(() => {
     let filteredApps = [...applications];
 
@@ -154,7 +173,6 @@ export default function Home() {
       finalFilteredApps = filteredApps;
     }
 
-
     const selectedApp = filters.aplicacionId !== 'all'
         ? applications.find(app => app.id === filters.aplicacionId) || null
         : finalFilteredApps.length === 1 ? finalFilteredApps[0] : null;
@@ -174,9 +192,15 @@ export default function Home() {
       appIds: createOptions(uniqueAppIds),
       filteredApplications: finalFilteredApps,
       selectedApplication: selectedApp,
-      filteredComponents: finalFilteredComponents,
+      filteredComponentsForApp: finalFilteredComponents,
     };
   }, [applications, components, filters]);
+
+  const diagramEntities = useMemo(() => {
+    const combinedList = [...filteredComponentsForApp, ...relatedApps];
+    return combinedList.filter(entity => visibleTypes.includes(entity.tipo));
+  }, [filteredComponentsForApp, relatedApps, visibleTypes]);
+
 
   useEffect(() => {
     if (segmentos.length === 1 && filters.segmento !== segmentos[0]) {
@@ -229,43 +253,67 @@ export default function Home() {
       dominio3: 'all',
       aplicacionId: 'all',
     });
+    setVisibleTypes(allEntityTypes);
   }
 
+  const handleTypeVisibilityChange = (type: string) => {
+    setVisibleTypes(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]);
+  }
 
   const handleAddComponent = () => {
     setEditingComponent(null);
-    setIsFormOpen(true);
+    setIsComponentFormOpen(true);
   };
+  
+  const handleAddRelatedApp = () => {
+    setEditingRelatedApp(null);
+    setIsRelatedAppFormOpen(true);
+  }
 
   const handleEditComponent = (component: Componente) => {
     setEditingComponent(component);
-    setIsFormOpen(true);
+    setIsComponentFormOpen(true);
   };
 
-  const handleDeleteComponent = (component: Componente) => {
-    setComponentToDelete(component);
+  const handleEditRelatedApp = (app: AplicacionRelacionada) => {
+    setEditingRelatedApp(app);
+    setIsRelatedAppFormOpen(true);
+  }
+
+  const handleDeleteItem = (item: Componente | AplicacionRelacionada, type: 'component' | 'relatedApp') => {
+    setItemToDelete({item, type});
   };
 
   const confirmDelete = () => {
-    if (componentToDelete) {
+    if (!itemToDelete) return;
+    const { item, type } = itemToDelete;
+    if (type === 'component') {
       setComponents(prev => prev
-        .filter(c => c.id !== componentToDelete.id)
-        .map(c => c.padreId === componentToDelete.id ? { ...c, padreId: null } : c)
+        .filter(c => c.id !== item.id)
+        .map(c => c.padreId === item.id ? { ...c, padreId: null } : c)
       );
       toast({
           title: t('deleteComponentToastTitle'),
-          description: t('deleteComponentToastDescription', { componentName: componentToDelete.nombre }),
+          description: t('deleteComponentToastDescription', { componentName: item.nombre }),
       });
-      setComponentToDelete(null);
+    } else if (type === 'relatedApp') {
+      setRelatedApps(prev => prev.filter(app => app.id !== item.id));
+      setComponents(prev => prev.map(c => c.padreId === item.id ? { ...c, padreId: null } : c));
+      toast({
+          title: t('deleteRelatedAppToastTitle'),
+          description: t('deleteRelatedAppToastDescription', { appName: item.nombre }),
+      });
     }
+
+    setItemToDelete(null);
   };
 
-  const handleFormSubmit = (data: Componente) => {
+  const handleComponentFormSubmit = (data: Componente) => {
     if (editingComponent) {
       setComponents(prev => prev.map(c => c.id === data.id ? data : c));
       toast({ title: t('updateComponentToastTitle'), description: t('updateComponentToastDescription', { componentName: data.nombre }) });
     } else {
-      if (components.some(c => c.id === data.id)) {
+      if (components.some(c => c.id === data.id) || relatedApps.some(app => app.id === data.id)) {
         toast({
           variant: "destructive",
           title: t('duplicateIdErrorToastTitle'),
@@ -277,6 +325,24 @@ export default function Home() {
       toast({ title: t('addComponentToastTitle'), description: t('addComponentToastDescription', { componentName: data.nombre }) });
     }
   };
+
+  const handleRelatedAppFormSubmit = (data: AplicacionRelacionada) => {
+    if (editingRelatedApp) {
+      setRelatedApps(prev => prev.map(app => app.id === data.id ? data : app));
+      toast({ title: t('updateRelatedAppToastTitle'), description: t('updateRelatedAppToastDescription', { appName: data.nombre }) });
+    } else {
+      if (components.some(c => c.id === data.id) || relatedApps.some(app => app.id === data.id)) {
+        toast({
+          variant: "destructive",
+          title: t('duplicateIdErrorToastTitle'),
+          description: t('duplicateIdErrorToastDescription', { componentId: data.id }),
+        });
+        return;
+      }
+      setRelatedApps(prev => [...prev, data]);
+      toast({ title: t('addRelatedAppToastTitle'), description: t('addRelatedAppToastDescription', { appName: data.nombre }) });
+    }
+  }
   
   if (!isMounted) {
     return (
@@ -308,36 +374,51 @@ export default function Home() {
         </header>
         
         <div className="p-4 border-b">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                 <Select onValueChange={(v) => handleFilterChange('pais', v)} value={filters.pais}>
-                    <SelectTrigger><SelectValue placeholder={t('countryPlaceholder')} /></SelectTrigger>
-                    <SelectContent>{paises.map(p => <SelectItem key={p} value={p}>{p === 'all' ? t('allCountries') : p}</SelectItem>)}</SelectContent>
-                </Select>
-                 <Select onValueChange={(v) => handleFilterChange('segmento', v)} value={filters.segmento}>
-                    <SelectTrigger><SelectValue placeholder={t('segmentPlaceholder')} /></SelectTrigger>
-                    <SelectContent>{segmentos.map(s => <SelectItem key={s} value={s}>{s === 'all' ? t('allSegments') : s}</SelectItem>)}</SelectContent>
-                </Select>
-                 <Select onValueChange={(v) => handleFilterChange('dominio1', v)} value={filters.dominio1}>
-                    <SelectTrigger><SelectValue placeholder={t('domain1Placeholder')} /></SelectTrigger>
-                    <SelectContent>{dominios1.map(d => <SelectItem key={d} value={d}>{d === 'all' ? t('allDomainsN1') : d}</SelectItem>)}</SelectContent>
-                </Select>
-                <Select onValueChange={(v) => handleFilterChange('dominio2', v)} value={filters.dominio2}>
-                    <SelectTrigger><SelectValue placeholder={t('domain2Placeholder')} /></SelectTrigger>
-                    <SelectContent>{dominios2.map(d => <SelectItem key={d} value={d}>{d === 'all' ? t('allDomainsN2') : d}</SelectItem>)}</SelectContent>
-                </Select>
-                <Select onValueChange={(v) => handleFilterChange('dominio3', v)} value={filters.dominio3}>
-                    <SelectTrigger><SelectValue placeholder={t('domain3Placeholder')} /></SelectTrigger>
-                    <SelectContent>{dominios3.map(d => <SelectItem key={d} value={d}>{d === 'all' ? t('allDomainsN3') : d}</SelectItem>)}</SelectContent>
-                </Select>
-                <Select onValueChange={(v) => handleFilterChange('aplicacionId', v)} value={filters.aplicacionId}>
-                    <SelectTrigger><SelectValue placeholder={t('applicationPlaceholder')} /></SelectTrigger>
-                    <SelectContent>{appIds.map(id => <SelectItem key={id} value={id}>{id === 'all' ? t('allApplications') : id}</SelectItem>)}</SelectContent>
-                </Select>
-                <div className="flex gap-2 col-span-2 md:col-span-1">
-                  <Button onClick={resetFilters} variant="ghost" className="w-full"><FilterX className="mr-2 h-4 w-4" /> {t('clearFilters')}</Button>
-                </div>
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+              <Select onValueChange={(v) => handleFilterChange('pais', v)} value={filters.pais}>
+                  <SelectTrigger><SelectValue placeholder={t('countryPlaceholder')} /></SelectTrigger>
+                  <SelectContent>{paises.map(p => <SelectItem key={p} value={p}>{p === 'all' ? t('allCountries') : p}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select onValueChange={(v) => handleFilterChange('segmento', v)} value={filters.segmento}>
+                  <SelectTrigger><SelectValue placeholder={t('segmentPlaceholder')} /></SelectTrigger>
+                  <SelectContent>{segmentos.map(s => <SelectItem key={s} value={s}>{s === 'all' ? t('allSegments') : s}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select onValueChange={(v) => handleFilterChange('dominio1', v)} value={filters.dominio1}>
+                  <SelectTrigger><SelectValue placeholder={t('domain1Placeholder')} /></SelectTrigger>
+                  <SelectContent>{dominios1.map(d => <SelectItem key={d} value={d}>{d === 'all' ? t('allDomainsN1') : d}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select onValueChange={(v) => handleFilterChange('dominio2', v)} value={filters.dominio2}>
+                  <SelectTrigger><SelectValue placeholder={t('domain2Placeholder')} /></SelectTrigger>
+                  <SelectContent>{dominios2.map(d => <SelectItem key={d} value={d}>{d === 'all' ? t('allDomainsN2') : d}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select onValueChange={(v) => handleFilterChange('dominio3', v)} value={filters.dominio3}>
+                  <SelectTrigger><SelectValue placeholder={t('domain3Placeholder')} /></SelectTrigger>
+                  <SelectContent>{dominios3.map(d => <SelectItem key={d} value={d}>{d === 'all' ? t('allDomainsN3') : d}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select onValueChange={(v) => handleFilterChange('aplicacionId', v)} value={filters.aplicacionId}>
+                  <SelectTrigger><SelectValue placeholder={t('applicationPlaceholder')} /></SelectTrigger>
+                  <SelectContent>{appIds.map(id => <SelectItem key={id} value={id}>{id === 'all' ? t('allApplications') : id}</SelectItem>)}</SelectContent>
+              </Select>
+              <Button onClick={resetFilters} variant="ghost"><FilterX className="mr-2 h-4 w-4" /> {t('clearFilters')}</Button>
+          </div>
         </div>
+
+         <div className="p-4 border-b flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <SlidersHorizontal className="h-4 w-4" />
+                <span>{t('filterByType')}:</span>
+              </div>
+              {allEntityTypes.map(type => (
+                <div key={type} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`type-${type}`}
+                    checked={visibleTypes.includes(type)}
+                    onCheckedChange={() => handleTypeVisibilityChange(type)}
+                  />
+                  <Label htmlFor={`type-${type}`} className="text-sm font-normal cursor-pointer">{t(type, type)}</Label>
+                </div>
+              ))}
+          </div>
 
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 overflow-hidden">
           <div className="flex flex-col gap-6 overflow-y-auto rounded-lg">
@@ -347,10 +428,6 @@ export default function Home() {
                      <h2 className="text-lg font-semibold">
                       {selectedApplication ? `${t('detailsFor')}: ${selectedApplication.nombre}` : (filteredApplications.length > 1 ? t('multipleApplications') : t('overview'))}
                     </h2>
-                     <Button onClick={handleAddComponent} size="sm">
-                        <PlusCircle className="mr-2 h-4 w-4" />
-                        {t('addComponent')}
-                     </Button>
                   </div>
                   {selectedApplication && (
                      <div className="mt-2 text-sm text-muted-foreground grid grid-cols-2 gap-x-4 gap-y-1">
@@ -366,15 +443,40 @@ export default function Home() {
 
                 </CardContent>
              </Card>
-            <DataManager 
-              components={filteredComponents} 
-              onEdit={handleEditComponent} 
-              onDelete={handleDeleteComponent}
-            />
+              <Accordion type="single" collapsible defaultValue="components">
+                  <AccordionItem value="components">
+                      <AccordionTrigger className="text-base font-semibold">{t('componentManagerTitle')}</AccordionTrigger>
+                      <AccordionContent>
+                          <Button onClick={handleAddComponent} size="sm" className="mb-4">
+                              <PlusCircle className="mr-2 h-4 w-4" />
+                              {t('addComponent')}
+                          </Button>
+                          <DataManager 
+                              components={filteredComponentsForApp} 
+                              onEdit={handleEditComponent} 
+                              onDelete={(c) => handleDeleteItem(c, 'component')}
+                          />
+                      </AccordionContent>
+                  </AccordionItem>
+                  <AccordionItem value="relatedApps">
+                      <AccordionTrigger className="text-base font-semibold">{t('relatedAppManagerTitle')}</AccordionTrigger>
+                      <AccordionContent>
+                           <Button onClick={handleAddRelatedApp} size="sm" className="mb-4">
+                              <PlusCircle className="mr-2 h-4 w-4" />
+                              {t('addRelatedApp')}
+                          </Button>
+                          <RelatedAppManager 
+                              relatedApps={relatedApps}
+                              onEdit={handleEditRelatedApp}
+                              onDelete={(app) => handleDeleteItem(app, 'relatedApp')}
+                          />
+                      </AccordionContent>
+                  </AccordionItem>
+              </Accordion>
           </div>
           <div className="flex flex-col overflow-hidden rounded-lg">
              <DiagramViewer 
-                components={filteredComponents} 
+                entities={diagramEntities}
                 application={selectedApplication} 
                 filteredApplications={filteredApplications}
              />
@@ -383,23 +485,32 @@ export default function Home() {
       </main>
 
       <ComponentForm
-        isOpen={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        onSubmit={handleFormSubmit}
+        isOpen={isComponentFormOpen}
+        onClose={() => setIsComponentFormOpen(false)}
+        onSubmit={handleComponentFormSubmit}
         component={editingComponent}
         allComponents={components}
+        allRelatedApps={relatedApps}
+      />
+      
+      <RelatedAppForm
+        isOpen={isRelatedAppFormOpen}
+        onClose={() => setIsRelatedAppFormOpen(false)}
+        onSubmit={handleRelatedAppFormSubmit}
+        app={editingRelatedApp}
+        existingIds={[...components.map(c => c.id), ...relatedApps.map(a => a.id)]}
       />
 
-      <AlertDialog open={!!componentToDelete} onOpenChange={(open) => !open && setComponentToDelete(null)}>
+      <AlertDialog open={!!itemToDelete} onOpenChange={(open) => !open && setItemToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('areYouSure')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('deleteWarning', { componentName: componentToDelete?.nombre })}
+              {itemToDelete?.type === 'component' ? t('deleteWarning', { componentName: itemToDelete.item.nombre }) : t('deleteRelatedAppWarning', { appName: itemToDelete?.item.nombre })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setComponentToDelete(null)}>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogCancel onClick={() => setItemToDelete(null)}>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {t('delete')}
             </AlertDialogAction>

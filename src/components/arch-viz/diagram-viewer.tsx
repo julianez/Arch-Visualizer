@@ -1,45 +1,48 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from 'lucide-react';
-import type { Componente, Aplicacion } from '@/lib/types';
+import type { Componente, Aplicacion, AplicacionRelacionada } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 import plantumlEncoder from 'plantuml-encoder';
 import Image from 'next/image';
 import { useI18n } from '@/context/i18n-context';
 
+type DiagramEntity = (Componente | AplicacionRelacionada) & { padreId?: string | null };
+
 interface DiagramViewerProps {
-  components: Componente[];
+  entities: DiagramEntity[];
   application: Aplicacion | null;
   filteredApplications: Aplicacion[];
 }
 
-const generatePlantUmlCode = (components: Componente[], application: Aplicacion | null, filteredApps: Aplicacion[], t: (key: string) => string) => {
-  let appName = t('currentSelection');
-  let appDescription = t('diagramBasedOnFilters');
+const generatePlantUmlCode = (entities: DiagramEntity[], application: Aplicacion | null, filteredApps: Aplicacion[], t: (key: string, defaultVal: string) => string) => {
+  let appName = t('currentSelection', 'the current selection');
+  let appDescription = t('diagramBasedOnFilters', 'Diagram based on active filters.');
 
   if (application) {
     appName = application.nombre;
     appDescription = application.descripcion;
   } else if (filteredApps.length > 1) {
-    appName = t('multipleApplications');
-    appDescription = t('aggregateOfApplications', { count: filteredApps.length });
+    appName = t('multipleApplications', 'Multiple Applications');
+    appDescription = t('aggregateOfApplications', 'Aggregate of {count} applications.').replace('{count}', String(filteredApps.length));
   }
 
-
-  if (components.length === 0) {
-    return `@startuml\n' ${t('noComponentsToDisplayFor', { appName })}\n@enduml`;
+  if (entities.length === 0) {
+    return `@startuml\n' ${t('noComponentsToDisplayFor', 'No items to display for {appName}').replace('{appName}', appName)}\n@enduml`;
   }
 
-  const sortedByLevel = [...components].sort((a, b) => a.nivel - b.nivel);
-  let puml = `@startuml ArchViz Diagram\n`;
+  const sortedByLevel = [...entities].sort((a, b) => ('nivel' in a && 'nivel' in b ? a.nivel - b.nivel : 0));
+  
+  let puml = `@startuml\n`;
   puml += `!theme plain\n`;
   
-  puml += `title ${t('architectureFor')} ${appName}\n`;
+  puml += `title ${t('architectureFor', 'Architecture for')} ${appName}\n`;
   if (appDescription) {
-    puml += `caption "${appDescription}"\n\n`;
+    puml += `caption "${appDescription.replace(/"/g, "''")}"\n\n`;
   }
   
   puml += `skinparam componentStyle uml2\n`;
@@ -47,20 +50,22 @@ const generatePlantUmlCode = (components: Componente[], application: Aplicacion 
   puml += `skinparam rectangle {\n  RoundCorner 20\n  BackgroundColor LightBlue\n}\n`;
   puml += `skinparam node {\n  BackgroundColor LightGray\n}\n\n`;
 
-  const levels = [...new Set(sortedByLevel.map(c => c.nivel))].sort((a,b) => a - b);
+  const entityIds = new Set(entities.map(e => e.id));
 
-  levels.forEach(level => {
-      puml += `' ${t('level')} ${level}\n`;
-      sortedByLevel.filter(c => c.nivel === level).forEach(c => {
-          puml += `[${c.id}] as "${c.nombre.replace(/"/g, "''")}\\n<size:10>[${c.tipo}] | APM: ${c.id}</size>"\n`;
-      });
-      puml += '\n';
+  sortedByLevel.forEach(entity => {
+      if (entity.tipo === 'AplicacionExterna') {
+          puml += `rectangle "[${entity.codigo}]\\n${entity.nombre.replace(/"/g, "''")}" as ${entity.id} #LightGray\n`;
+      } else if ('nivel' in entity) {
+          const component = entity as Componente;
+          puml += `[${component.id}] as "${component.nombre.replace(/"/g, "''")}\\n<size:10>[${component.tipo}] | APM: ${component.id}</size>"\n`;
+      }
   });
+  puml += '\n';
 
-  puml += `' ${t('relationships')}\n`;
-  sortedByLevel.forEach(c => {
-    if (c.padreId && components.some(p => p.id === c.padreId)) {
-      puml += `${c.padreId} <|-- ${c.id}\n`;
+  puml += `' ${t('relationships', 'Relationships')}\n`;
+  entities.forEach(entity => {
+    if (entity.padreId && entityIds.has(entity.padreId)) {
+      puml += `${entity.padreId} <|-- ${entity.id}\n`;
     }
   });
 
@@ -69,7 +74,7 @@ const generatePlantUmlCode = (components: Componente[], application: Aplicacion 
 };
 
 
-export function DiagramViewer({ components, application, filteredApplications }: DiagramViewerProps) {
+export function DiagramViewer({ entities, application, filteredApplications }: DiagramViewerProps) {
   const { t } = useI18n();
   const [isCopied, setIsCopied] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -80,7 +85,7 @@ export function DiagramViewer({ components, application, filteredApplications }:
     setIsClient(true);
   }, []);
 
-  const plantUmlCode = useMemo(() => generatePlantUmlCode(components, application, filteredApplications, t), [components, application, filteredApplications, t]);
+  const plantUmlCode = useMemo(() => generatePlantUmlCode(entities, application, filteredApplications, t), [entities, application, filteredApplications, t]);
 
   useEffect(() => {
     if (isClient) {
@@ -103,14 +108,13 @@ export function DiagramViewer({ components, application, filteredApplications }:
     });
   };
 
-  const appName = application?.nombre || (filteredApplications.length > 1 ? t('multipleApplications') : t('currentView'));
-
+  const appName = application?.nombre || (filteredApplications.length > 1 ? t('multipleApplications', 'Multiple Applications') : t('currentView', 'the current view'));
 
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
-        <CardTitle>{t('diagramViewerTitle')}</CardTitle>
-        <CardDescription>{t('diagramViewerDescription')}</CardDescription>
+        <CardTitle>{t('diagramViewerTitle', 'Diagram Visualization')}</CardTitle>
+        <CardDescription>{t('diagramViewerDescription', 'Diagram generated from the components.')}</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 bg-muted/30 rounded-lg m-6 mt-0 p-4 relative overflow-auto flex items-center justify-center">
         {!isClient || (isLoading && !diagramUrl) ? (
@@ -120,10 +124,10 @@ export function DiagramViewer({ components, application, filteredApplications }:
             <Skeleton className="h-4 w-[220px]" />
             <Skeleton className="h-32 w-full" />
           </div>
-        ) : diagramUrl && components.length > 0 ? (
+        ) : diagramUrl && entities.length > 0 ? (
             <Image 
               src={diagramUrl} 
-              alt={t('architectureDiagramFor', { appName })}
+              alt={t('architectureDiagramFor', 'Architecture diagram for {appName}').replace('{appName}', appName)}
               fill
               style={{ objectFit: 'contain' }}
               onLoad={() => setIsLoading(false)}
@@ -131,13 +135,13 @@ export function DiagramViewer({ components, application, filteredApplications }:
               unoptimized // Required for external dynamic images
             />
         ) : (
-          <p>{t('noComponentsForFilters')}</p>
+          <p>{t('noComponentsForFilters', 'No items to display with current filters.')}</p>
         )}
       </CardContent>
       <CardFooter>
-        <Button onClick={handleCopy} className="w-full" variant="secondary" disabled={components.length === 0}>
+        <Button onClick={handleCopy} className="w-full" variant="secondary" disabled={entities.length === 0}>
           {isCopied ? <Check className="mr-2 h-4 w-4" /> : <Copy className="mr-2 h-4 w-4" />}
-          {isCopied ? t('copied') : t('copyCode')}
+          {isCopied ? t('copied', 'Copied!') : t('copyCode', 'Copy Code')}
         </Button>
       </CardFooter>
     </Card>
