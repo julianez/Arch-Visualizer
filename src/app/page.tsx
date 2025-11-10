@@ -170,9 +170,11 @@ export default function Home() {
     }
     
     const createCurrencyOptions = (uniqueValues: string[]) => {
-      const options = ['all', ...uniqueValues];
-      if (uniqueValues.length === 0) return ['all'];
-      if (uniqueValues.length === 1) return uniqueValues;
+      const allPossibleValues = ['Sí', 'No'];
+      const presentValues = allPossibleValues.filter(val => uniqueValues.includes(val));
+      const options = ['all', ...presentValues];
+
+      if (presentValues.length < 2) return options;
       return options;
     }
 
@@ -182,7 +184,7 @@ export default function Home() {
       dominios1: createOptions(uniqueDominios1),
       dominios2: createOptions(uniqueDominios2),
       dominios3: createOptions(uniqueDominios3),
-      currencyIssuesOptions: createCurrencyOptions(uniqueCurrencyIssues as string[]),
+      currencyIssuesOptions: createCurrencyOptions(Array.from(new Set(applications.map(a => a.currency_issues)))),
       appIds: createOptions(uniqueAppIds),
       filteredApplications: finalFilteredApps,
       selectedApplication: selectedApp,
@@ -203,9 +205,12 @@ export default function Home() {
     if (dominios3.length === 1 && filters.dominio3 !== dominios3[0]) {
       handleFilterChange('dominio3', dominios3[0]);
     }
-    if (currencyIssuesOptions.length === 1 && filters.currency_issues !== currencyIssuesOptions[0]) {
+    if (currencyIssuesOptions.length === 2 && filters.currency_issues === 'all') {
+      // Don't auto-select if 'all' is a valid choice with other options
+    } else if (currencyIssuesOptions.length === 1 && filters.currency_issues !== currencyIssuesOptions[0]) {
       handleFilterChange('currency_issues', currencyIssuesOptions[0]);
     }
+    
     if (appIds.length === 1 && filters.aplicacionId !== appIds[0]) {
       handleFilterChange('aplicacionId', appIds[0]);
     }
@@ -433,5 +438,3 @@ export default function Home() {
     </>
   );
 }
-
-    
