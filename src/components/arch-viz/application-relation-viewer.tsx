@@ -29,7 +29,7 @@ const generatePlantUmlCode = (
 
   const visibleApps = allApplications.filter(app => visibleAppIds.has(app.id));
 
-  let puml = `@startuml AppRelations\n`;
+  let puml = `@startuml\n`;
   puml += `!theme plain\n`;
   puml += `title ${t('appRelationships')}\n\n`;
   puml += `skinparam shadowing false\n`;
