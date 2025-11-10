@@ -5,21 +5,19 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from 'lucide-react';
-import type { Componente, Aplicacion, AplicacionRelacionada } from '@/lib/types';
+import type { Componente, Aplicacion } from '@/lib/types';
 import { Skeleton } from '../ui/skeleton';
 import plantumlEncoder from 'plantuml-encoder';
 import Image from 'next/image';
 import { useI18n } from '@/context/i18n-context';
 
-type DiagramEntity = (Componente | AplicacionRelacionada) & { padreId?: string | null };
-
 interface DiagramViewerProps {
-  entities: DiagramEntity[];
+  entities: Componente[];
   application: Aplicacion | null;
   filteredApplications: Aplicacion[];
 }
 
-const generatePlantUmlCode = (entities: DiagramEntity[], application: Aplicacion | null, filteredApps: Aplicacion[], t: (key: string, defaultVal: string) => string) => {
+const generatePlantUmlCode = (entities: Componente[], application: Aplicacion | null, filteredApps: Aplicacion[], t: (key: string, defaultVal: string) => string) => {
   let appName = t('currentSelection', 'the current selection');
   let appDescription = t('diagramBasedOnFilters', 'Diagram based on active filters.');
 
@@ -35,7 +33,7 @@ const generatePlantUmlCode = (entities: DiagramEntity[], application: Aplicacion
     return `@startuml\n' ${t('noComponentsToDisplayFor', 'No items to display for {appName}').replace('{appName}', appName)}\n@enduml`;
   }
 
-  const sortedByLevel = [...entities].sort((a, b) => ('nivel' in a && 'nivel' in b ? a.nivel - b.nivel : 0));
+  const sortedByLevel = [...entities].sort((a, b) => a.nivel - b.nivel);
   
   let puml = `@startuml\n`;
   puml += `!theme plain\n`;
@@ -53,12 +51,8 @@ const generatePlantUmlCode = (entities: DiagramEntity[], application: Aplicacion
   const entityIds = new Set(entities.map(e => e.id));
 
   sortedByLevel.forEach(entity => {
-      if (entity.tipo === 'AplicacionExterna') {
-          puml += `rectangle "[${entity.codigo}]\\n${entity.nombre.replace(/"/g, "''")}" as ${entity.id} #LightGray\n`;
-      } else if ('nivel' in entity) {
-          const component = entity as Componente;
-          puml += `[${component.id}] as "${component.nombre.replace(/"/g, "''")}\\n<size:10>[${component.tipo}] | APM: ${component.id}</size>"\n`;
-      }
+      const component = entity as Componente;
+      puml += `[${component.id}] as "${component.nombre.replace(/"/g, "''")}\\n<size:10>[${component.tipo}] | APM: ${component.id}</size>"\n`;
   });
   puml += '\n';
 

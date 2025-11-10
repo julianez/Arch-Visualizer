@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Componente, AplicacionRelacionada } from "@/lib/types";
+import type { Componente } from "@/lib/types";
 import { componentTypes } from "@/lib/types";
 import { useI18n } from "@/context/i18n-context";
 
@@ -49,11 +49,10 @@ interface ComponentFormProps {
   onSubmit: (data: Componente) => void;
   component: Componente | null;
   allComponents: Componente[];
-  allRelatedApps: AplicacionRelacionada[];
   applicationId: string;
 }
 
-export function ComponentForm({ isOpen, onClose, onSubmit, component, allComponents, allRelatedApps, applicationId }: ComponentFormProps) {
+export function ComponentForm({ isOpen, onClose, onSubmit, component, allComponents, applicationId }: ComponentFormProps) {
   const { t } = useI18n();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,12 +81,10 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
   const currentId = form.getValues('id');
 
   const parentOptions = React.useMemo(() => {
-    const internalParents = currentAplicacionId
+    return currentAplicacionId
       ? allComponents.filter(c => c.aplicacionId === currentAplicacionId && c.id !== currentId)
       : [];
-    const relatedParents = allRelatedApps.filter(ra => ra.aplicacionId === currentAplicacionId);
-    return [...internalParents, ...relatedParents];
-  }, [currentAplicacionId, allComponents, allRelatedApps, currentId]);
+  }, [currentAplicacionId, allComponents, currentId]);
 
 
   const handleFormSubmit = (values: z.infer<typeof formSchema>) => {
@@ -213,5 +210,3 @@ export function ComponentForm({ isOpen, onClose, onSubmit, component, allCompone
     </Dialog>
   );
 }
-
-    

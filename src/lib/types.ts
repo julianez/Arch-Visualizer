@@ -24,13 +24,3 @@ export interface Componente {
 }
 
 export const componentTypes = ['Componente', 'Servicio', 'Módulo', 'Clase'];
-
-export interface AplicacionRelacionada {
-  id: string;
-  codigo: string;
-  nombre: string;
-  tipo: 'AplicacionExterna';
-  aplicacionId: string;
-}
-
-    
