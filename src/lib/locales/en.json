@@ -67,5 +67,11 @@
     "architectureDiagramFor": "Architecture diagram for {appName}",
     "noComponentsForFilters": "No components to display with current filters.",
     "copied": "Copied!",
-    "copyCode": "Copy Code"
+    "copyCode": "Copy Code",
+    "componentsView": "Components",
+    "relationsView": "App Relations",
+    "relationDiagramTitle": "Application Relationship Diagram",
+    "relationDiagramDescription": "Visualization of inter-application connections.",
+    "appRelationships": "Application Relationships",
+    "noAppsForFilters": "No applications to display with current filters."
 }

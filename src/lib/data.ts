@@ -28,6 +28,7 @@ export const initialApplicationData: Aplicacion[] = [
             nivel2: 'Backend',
             nivel3: 'Inventario'
         },
+        relaciones: ['APL-3']
     },
     {
         id: 'APL-2',
@@ -52,5 +53,6 @@ export const initialApplicationData: Aplicacion[] = [
             nivel2: 'Comercial',
             nivel3: 'Seguimiento'
         },
+        relaciones: ['APL-1']
     }
 ];
