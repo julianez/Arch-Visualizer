@@ -5,7 +5,6 @@ import { initialComponentData, initialApplicationData } from '@/lib/data';
 import type { Componente, Aplicacion } from '@/lib/types';
 import { DataManager } from '@/components/arch-viz/data-manager';
 import { DiagramViewer } from '@/components/arch-viz/diagram-viewer';
-import { ApplicationRelationViewer } from '@/components/arch-viz/application-relation-viewer';
 import { ComponentForm } from '@/components/arch-viz/component-form';
 import { Button } from '@/components/ui/button';
 import {
@@ -35,7 +34,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 
 type Filters = {
@@ -152,7 +150,6 @@ export default function Home() {
     const finalFilteredAppIds = new Set(finalFilteredComponents.map(c => c.aplicacionId));
     let finalFilteredApps = applications.filter(app => finalFilteredAppIds.has(app.id));
 
-    // If no components match, but apps do, show those apps in the relation view.
     if(finalFilteredComponents.length === 0 && filters.aplicacionId === 'all'){
       finalFilteredApps = filteredApps;
     }
@@ -376,25 +373,11 @@ export default function Home() {
             />
           </div>
           <div className="flex flex-col overflow-hidden rounded-lg">
-            <Tabs defaultValue="components" className="w-full h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="components">{t('componentsView')}</TabsTrigger>
-                <TabsTrigger value="relations">{t('relationsView')}</TabsTrigger>
-              </TabsList>
-              <TabsContent value="components" className="flex-1 overflow-auto">
-                 <DiagramViewer 
-                    components={filteredComponents} 
-                    application={selectedApplication} 
-                    filteredApplications={filteredApplications}
-                />
-              </TabsContent>
-              <TabsContent value="relations" className="flex-1 overflow-auto">
-                <ApplicationRelationViewer
-                  allApplications={applications}
-                  filteredApplications={filteredApplications}
-                />
-              </TabsContent>
-            </Tabs>
+            <DiagramViewer 
+              components={filteredComponents} 
+              application={selectedApplication} 
+              filteredApplications={filteredApplications}
+            />
           </div>
         </div>
       </main>
