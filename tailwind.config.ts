@@ -3,9 +3,14 @@ import type {Config} from 'tailwindcss';
 export default {
   darkMode: ['class'],
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/page.tsx',
+    './src/app/layout.tsx',
+    './src/components/arch-viz/component-form.tsx',
+    './src/components/arch-viz/data-manager.tsx',
+    './src/components/arch-viz/diagram-viewer.tsx',
+    './src/components/arch-viz/type-icon.tsx',
+    './src/components/ui/*.tsx',
+    './src/context/i18n-context.tsx',
   ],
   theme: {
     extend: {
@@ -97,3 +102,5 @@ export default {
   },
   plugins: [require('tailwindcss-animate')],
 } satisfies Config;
+
+    

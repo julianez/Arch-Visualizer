@@ -24,3 +24,5 @@ export interface Componente {
 }
 
 export const componentTypes = ['Componente', 'Servicio', 'Módulo', 'Clase'];
+
+    
