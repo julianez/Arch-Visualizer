@@ -16,7 +16,6 @@ interface ApplicationRelationViewerProps {
 }
 
 const generatePlantUmlCode = (
-  allApplications: Aplicacion[],
   filteredApplications: Aplicacion[],
   t: (key: string) => string
 ) => {
@@ -32,22 +31,22 @@ const generatePlantUmlCode = (
 
   const filteredAppIds = new Set(filteredApplications.map(app => app.id));
 
-  // Define all applications in the filter scope
+  // 1. Define all applications in the filter scope as rectangles
   filteredApplications.forEach(app => {
     puml += `rectangle "[${app.id}]\\n${app.nombre.replace(/"/g, "''")}" as ${app.id}\n`;
   });
 
   puml += '\n';
 
-  // Define relationships
+  // 2. Define relationships as lines
   const drawnRelations = new Set<string>();
-
   filteredApplications.forEach(app => {
     if (app.relaciones) {
       app.relaciones.forEach(targetId => {
         // Draw relation only if target is also in the filter scope
         if (filteredAppIds.has(targetId)) {
-          const relationKey = [app.id, targetId].sort().join('-');
+          // Sort to create a consistent key and avoid duplicates (A-B is same as B-A)
+          const relationKey = [app.id, targetId].sort().join('--');
           if (!drawnRelations.has(relationKey)) {
             puml += `${app.id} -- ${targetId}\n`;
             drawnRelations.add(relationKey);
@@ -73,7 +72,7 @@ export function ApplicationRelationViewer({ allApplications, filteredApplication
     setIsClient(true);
   }, []);
 
-  const plantUmlCode = useMemo(() => generatePlantUmlCode(allApplications, filteredApplications, t), [allApplications, filteredApplications, t]);
+  const plantUmlCode = useMemo(() => generatePlantUmlCode(filteredApplications, t), [filteredApplications, t]);
 
   useEffect(() => {
     if (isClient) {
