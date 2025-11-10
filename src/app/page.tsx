@@ -5,7 +5,6 @@ import { initialComponentData, initialApplicationData } from '@/lib/data';
 import type { Componente, Aplicacion } from '@/lib/types';
 import { DataManager } from '@/components/arch-viz/data-manager';
 import { DiagramViewer } from '@/components/arch-viz/diagram-viewer';
-import { ApplicationRelationViewer } from '@/components/arch-viz/application-relation-viewer';
 import { ComponentForm } from '@/components/arch-viz/component-form';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,7 +27,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useI18n } from '@/context/i18n-context';
 import {
   DropdownMenu,
@@ -341,7 +339,7 @@ export default function Home() {
             </div>
         </div>
 
-        <Tabs defaultValue="components" className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 overflow-hidden">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 overflow-hidden">
           <div className="flex flex-col gap-6 overflow-y-auto rounded-lg">
              <Card>
                 <CardContent className="p-4">
@@ -375,25 +373,13 @@ export default function Home() {
             />
           </div>
           <div className="flex flex-col overflow-hidden rounded-lg">
-             <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="components">{t('componentDiagramTab')}</TabsTrigger>
-                <TabsTrigger value="relations">{t('relationDiagramTab')}</TabsTrigger>
-            </TabsList>
-            <TabsContent value="components" className="flex-1 mt-0">
-                <DiagramViewer 
+             <DiagramViewer 
                 components={filteredComponents} 
                 application={selectedApplication} 
                 filteredApplications={filteredApplications}
-                />
-            </TabsContent>
-            <TabsContent value="relations" className="flex-1 mt-0">
-                <ApplicationRelationViewer 
-                components={filteredComponents}
-                allApplications={applications}
-                />
-            </TabsContent>
+             />
           </div>
-        </Tabs>
+        </div>
       </main>
 
       <ComponentForm

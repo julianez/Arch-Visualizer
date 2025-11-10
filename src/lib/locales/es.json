@@ -68,10 +68,5 @@
     "noComponentsForFilters": "No hay componentes para mostrar con los filtros actuales.",
     "copied": "¡Copiado!",
     "copyCode": "Copiar Código",
-    "componentDiagramTab": "Diagrama de Componentes",
-    "relationDiagramTab": "Relaciones entre Apps",
-    "relationDiagramTitle": "Diagrama de Relaciones entre Aplicaciones",
-    "relationDiagramDescription": "Representación visual de cómo interactúan las aplicaciones.",
-    "appRelationships": "Relaciones entre Aplicaciones",
-    "noAppsForFilters": "No hay aplicaciones para mostrar con los filtros actuales."
+    "componentDiagramTab": "Diagrama de Componentes"
 }

@@ -22,10 +22,4 @@ export interface Componente {
   nivel: number;
 }
 
-export interface AplicacionRelacion {
-  sourceAppId: string;
-  targetAppId: string;
-  description: string;
-}
-
 export const componentTypes = ['Componente', 'Servicio', 'Módulo', 'Clase'];
